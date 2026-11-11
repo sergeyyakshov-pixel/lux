@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LUX — Админ-панель</title><link rel="stylesheet" href="style.css">
+<style>
+.admin{max-width:760px;margin:7vh auto;padding:24px}.admin .glass{margin:16px 0}
+.admin form{display:grid;gap:12px;max-width:460px}.admin label{display:grid;gap:6px}
+.admin input{padding:12px;border-radius:10px;border:1px solid #526b91;background:#080f1e;color:white;font:inherit}
+.admin .status{color:#a9d0ff;overflow-wrap:anywhere}.admin a{color:#a9d0ff}
+</style></head><body>
+<header class="top"><a class="logo" href="index.html">LUX<span>✦</span></a><a href="index.html">← На сайт</a></header>
+<main class="admin"><section class="glass"><small>LUMINOUS URBAN XPERIENCE</small><h1>Админ-панель LUX</h1>
+<p>Вход для зарегистрированных администраторов города.</p>
+<form id="loginForm"><label>Email<input id="email" type="email" autocomplete="username" required></label>
+<label>Пароль<input id="password" type="password" autocomplete="current-password" required></label>
+<button class="silver">Войти</button></form><p id="status" class="status" aria-live="polite"></p>
+<p><a href="index.html">Вернуться на главную</a></p></section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script><script src="admin.js"></script></body></html>
