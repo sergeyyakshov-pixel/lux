@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#070b16">
+  <title>Админ-панель LUX</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body{min-height:100vh}.admin-wrap{max-width:760px;margin:7vh auto;padding:24px}
+    .admin-wrap h1{font-size:clamp(30px,5vw,46px);margin:5px 0 18px}
+    .admin-form{display:grid;gap:14px;max-width:460px}
+    .admin-form label{display:grid;gap:7px}
+    .admin-form input{width:100%;border:1px solid #526b91;background:#080f1e;color:white;padding:12px;border-radius:10px;font:inherit}
+    .note{font-size:13px;color:#a9b8d0}.status{margin-top:14px;color:#a9d0ff}
+    .back{display:inline-block;margin-top:20px;color:#a8d0ff}
+  </style>
+</head>
+<body>
+  <main class="admin-wrap">
+    <div class="glass">
+      <small style="color:#8bc5ff;letter-spacing:.2em">LUMINOUS URBAN XPERIENCE</small>
+      <h1>Админ-панель LUX</h1>
+      <p>Вход администратора через Supabase Authentication.</p>
+      <form id="loginForm" class="admin-form">
+        <label>Email<input id="email" type="email" autocomplete="username" required></label>
+        <label>Пароль<input id="password" type="password" autocomplete="current-password" required></label>
+        <button class="silver" type="submit">Войти</button>
+      </form>
+      <p class="note">Подключение Supabase пока не настроено. Сначала заполни <code>supabase-config.js</code> значениями Project URL и Publishable (anon) key. Никогда не вставляй сюда Secret или service_role key.</p>
+      <p id="status" class="status" aria-live="polite"></p>
+      <a class="back" href="index.html">← Вернуться на сайт</a>
+    </div>
+  </main>
+  <script src="supabase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
