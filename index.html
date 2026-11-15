@@ -1,28 +1,195 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d1a">
-<title>LUX — официальный сайт города</title>
-<style>
-:root{--bg:#080d19;--panel:#121e33dd;--line:#ffffff24;--silver:#e1eafa;--blue:#80bdff;--muted:#adbed7}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#20365e 0,transparent 45%),linear-gradient(145deg,#05070d,#0c1730 65%,#070b15);color:#f1f6ff;font:16px/1.6 system-ui, sans-serif}.wrap{width:min(1100px,92%);margin:auto}a{color:inherit;text-decoration:none}header{position:sticky;top:0;z-index:5;background:#080e1bea;backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}.head{height:68px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:950;letter-spacing:.23em;font-size:24px;text-shadow:0 0 18px #8bbcff}.brand small{display:block;font-size:8px;letter-spacing:.2em;color:#a9bedc;margin-top:-7px}.links{display:flex;gap:18px;font-size:14px;color:#c8d6eb}.links a:hover{color:white}.menu{display:none;background:#172743;color:white;border:1px solid var(--line);border-radius:10px;padding:8px 12px}.hero{margin:25px auto 0;min-height:440px;border:1px solid var(--line);border-radius:28px;display:flex;align-items:center;overflow:hidden;background:linear-gradient(90deg,#050a16f5,#0c1a32aa),radial-gradient(ellipse at 75% 40%,#5488d577,transparent 50%)}.hero-in{padding:clamp(25px,6vw,65px);max-width:760px}.eyebrow{color:#8fc5ff;text-transform:uppercase;letter-spacing:.2em;font-size:11px;font-weight:800}.hero h1{font-size:clamp(42px,8vw,76px);line-height:1.02;letter-spacing:-.05em;margin:15px 0}.shine{background:linear-gradient(90deg,#fff,#a9caff,#d0c2ff);color:transparent;background-clip:text}.lead{color:#c2d0e5;font-size:19px;max-width:570px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}.btn{display:inline-block;border:1px solid #dce8f9aa;background:linear-gradient(135deg,#edf4ff,#9eafc9);color:#101a2a;border-radius:12px;padding:10px 17px;font-weight:800;cursor:pointer}.btn.alt{background:#142541;color:#eff5ff;border-color:#7897c5}section{padding:43px 0}.heading{margin-bottom:20px}.heading h2{font-size:clamp(28px,4vw,38px);margin:5px 0}.muted,.heading p{color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.two{display:grid;grid-template-columns:1fr 1fr;gap:15px}.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:21px;backdrop-filter:blur(15px);box-shadow:0 15px 40px #0003}.card h3{margin:8px 0}.card p{color:#bdcbe0;margin:0}.tag{display:inline-block;border:1px solid #8dbaff66;border-radius:30px;padding:2px 10px;color:#acd0ff;font-size:11px}.mapbox{min-height:190px;display:grid;place-items:center;text-align:center;padding:20px;border:1px dashed #829dc8;border-radius:18px;background:#14213a;color:#c6d7f0}.legend{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}.legend div{padding:10px;border:1px solid var(--line);border-radius:11px;background:#ffffff08;color:#cbd8eb}.form{display:grid;gap:12px}.field label{display:block;font-size:13px;color:#cbd8eb;margin-bottom:5px}.field input,.field textarea{width:100%;padding:12px;border-radius:11px;border:1px solid #526987;background:#080f1e;color:white;font:inherit}.error{font-size:12px;color:#ff9ca8;min-height:15px}.robot{font-size:45px;filter:drop-shadow(0 0 13px #78baff);animation:bob 2s infinite}.ai{text-align:center}.chat-launch{position:fixed;right:15px;bottom:15px;z-index:8;border:1px solid #b4ceff;border-radius:14px;background:linear-gradient(135deg,#e5efff,#94a9c9);color:#101a2a;padding:11px 15px;font-weight:900}.chat{display:none;position:fixed;right:14px;bottom:72px;z-index:8;width:min(340px,calc(100vw - 28px));background:#0d182b;border:1px solid #829fce;border-radius:18px;overflow:hidden;box-shadow:0 15px 45px #0009}.chat.open{display:block}.chathead,.chatfoot{padding:10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.chatbody{padding:12px;max-height:220px;overflow:auto}.bubble{background:#1c2e4b;padding:9px 11px;border-radius:12px;margin-bottom:8px;font-size:14px}.bubble.user{margin-left:28px;background:#2a4268}.chatfoot{border-top:1px solid var(--line);border-bottom:0;gap:6px}.chatfoot input{min-width:0;flex:1;padding:9px;background:#080e1b;color:white;border:1px solid var(--line);border-radius:9px}.chatfoot button{padding:9px;border:0;border-radius:9px}.drawer{display:none;position:fixed;inset:0;z-index:9;background:#000b}.drawer.open{display:block}.drawer nav{margin-left:auto;width: min(300px,85vw);height:100%;background:#0d182b;padding:25px;display:grid;align-content:start;gap:12px}.drawer nav a{padding:12px;border:1px solid var(--line);border-radius:10px}footer{border-top:1px solid var(--line);padding:25px 0;color:#aebdd3;font-size:13px}.foot{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}@keyframes bob{50%{transform:translateY(-5px)}}@media(max-width:760px){.links{display:none}.menu{display:block}.grid,.two{grid-template-columns:1fr}.legend{grid-template-columns:1fr}.hero{min-height:390px}}
-</style></head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b16">
+  <meta name="description" content="LUX — уютный Minecraft-город на сервере AnMine PE.">
+  <title>LUX — Luminous Urban Xperience</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
 <body>
-<header><div class="wrap head"><a class="brand" href="#home">LUX<small>ОФИЦИАЛЬНЫЙ САЙТ ГОРОДА</small></a><nav class="links"><a href="#about">О городе</a><a href="#news">Новости</a><a href="#map">Карта</a><a href="#residents">Жители</a><a href="#join">Вступить</a><a href="#ai">LUX AI</a></nav><button class="menu" id="menu">☰</button></div></header>
-<main class="wrap">
-<section class="hero" id="home"><div class="hero-in"><div class="eyebrow">Minecraft · AnMine PE</div><h1>Добро пожаловать<br>в <span class="shine">LUX</span></h1><p class="lead">Город света, роскоши и современных возможностей. Здесь начинается твоя история.</p><div class="actions"><a class="btn" href="#about">Открыть город</a><a class="btn alt" href="#join">Вступить в LUX</a></div></div></section>
-<section id="about"><div class="heading"><div class="eyebrow">История и атмосфера</div><h2>О городе LUX</h2><p>Проект Minecraft-города, который будет развиваться вместе с жителями.</p></div><div class="two"><article class="card"><span class="tag">История</span><h3>Как появился LUX</h3><p>Идея создать город появилась весной 2026 года. Её предложил GienaSergo01. Название LUX нашли в интернете — оно ассоциируется с роскошью, светом и современным городом.</p></article><article class="card"><span class="tag">Идея</span><h3>Город для сообщества</h3><p>В LUX планируется развивать инфраструктуру, строить здания, создавать общественные пространства и проводить совместные игровые активности.</p></article></div></section>
-<section id="news"><div class="heading"><div class="eyebrow">Обновления</div><h2>Новости LUX</h2><p>Официальные объявления и события города.</p></div><div class="grid"><article class="card"><span class="tag">Сайт</span><h3>Обновление сайта</h3><p>Создаётся единая площадка с информацией о городе, его жителях, карте и помощнике LUX AI.</p></article><article class="card"><span class="tag">Сообщество</span><h3>Вступление в город</h3><p>На сайте подготовлен раздел для желающих присоединиться к проекту.</p></article><article class="card"><span class="tag">Планы</span><h3>Развитие LUX</h3><p>Новые новости будут добавляться администрацией по мере развития города.</p></article></div></section>
-<section id="map"><div class="heading"><div class="eyebrow">Навигация</div><h2>Карта города</h2><p>Карта будет добавлена после загрузки актуального скриншота Minecraft.</p></div><div class="mapbox"><div><div style="font-size:36px">⌖</div><b>Карта LUX</b><p>Здесь появится карта с отметками важных мест.</p></div></div><div class="legend"><div>🏛️ Администрация</div><div>🛒 Рынок</div><div>🏠 Жилые дома</div><div>🛣️ Дороги и транспорт</div><div>🍽️ Ресторан «Вкусно и точка»</div></div></section>
-<section id="residents"><div class="heading"><div class="eyebrow">Наше сообщество</div><h2>Жители LUX</h2><p>Каталог участников города.</p></div><div class="card"><h3>Каталог готовится</h3><p>Здесь будут отображаться Minecraft-ник, аватар, роль и дата вступления каждого жителя. Для настоящего каталога потребуется подключить базу данных.</p></div></section>
-<section id="join"><div class="heading"><div class="eyebrow">Стань частью города</div><h2>Вступить в LUX</h2><p>Заполни демонстрационную форму заявки.</p></div><div class="card"><form id="joinForm" class="form"><div class="field"><label for="nick">Ник Minecraft</label><input id="nick" placeholder="Твой игровой ник"><div class="error" id="nickError"></div></div><div class="field"><label for="tg">Telegram</label><input id="tg" placeholder="@username"><div class="error" id="tgError"></div></div><div class="field"><label for="reason">Почему хочешь вступить?</label><textarea id="reason" rows="3" placeholder="Расскажи немного о себе"></textarea><div class="error" id="reasonError"></div></div><button class="btn" type="submit">Отправить заявку</button><p class="muted" style="font-size:12px">Пока форма не отправляет данные администрации. Для реального приёма заявок понадобится сервер или сервис форм.</p></form><div id="success" hidden><h3>Спасибо за интерес к LUX!</h3><p>Для фактического вступления свяжись с администрацией.</p><a class="btn" href="#home">На главную</a></div></div></section>
-<section id="ai"><div class="heading"><div class="eyebrow">Городской помощник</div><h2>LUX AI</h2><p>Дружелюбный помощник для посетителей сайта.</p></div><div class="card ai"><div class="robot">🤖</div><h3>Привет! Я LUX AI</h3><p>Сейчас это демонстрационный интерфейс. Настоящий ИИ, голосовой ввод и озвучивание ответов подключим отдельным этапом.</p><button class="btn alt" onclick="toggleChat(true)">Открыть чат</button></div></section>
+
+<header class="top">
+  <a class="logo" href="#home">LUX<span>✦</span></a>
+  <button class="menu" id="menuBtn" aria-label="Открыть меню">☰</button>
+
+  <nav id="nav">
+    <a href="#about">О городе</a>
+    <a href="#news">Новости</a>
+    <a href="#map">Карта</a>
+    <a href="#residents">Жители</a>
+    <a href="#join">Вступить</a>
+    <a href="#ai">LUX AI</a>
+  </nav>
+</header>
+
+<main id="home">
+
+<section class="hero">
+  <div class="heroText">
+    <small>LUMINOUS URBAN XPERIENCE</small>
+    <h1>ГОРОД,<br><em>КОТОРЫЙ СИЯЕТ</em></h1>
+    <p>Добро пожаловать в LUX — уютный Minecraft-город на сервере AnMine PE.</p>
+    <a class="silver" href="#about">Исследовать LUX</a>
+  </div>
+  <div class="orb">LUX<span>✦</span></div>
+</section>
+
+<section id="about">
+  <div class="heading">
+    <small>01 / ОТКРЫТИЕ</small>
+    <h2>О городе LUX</h2>
+  </div>
+
+  <div class="cards">
+    <article class="glass">
+      <h3>Наша история</h3>
+      <p>LUX — небольшой уютный город на сервере AnMine PE. Идея города появилась весной 2026 года по предложению GienaSergo01. Название ассоциируется с роскошью, светом и современным городом.</p>
+    </article>
+
+    <article class="glass">
+      <h3>Основатели</h3>
+      <p><b>GienaSergo01</b><br><b>XXOmegaRavenXX</b><br>Основатели и главные администраторы города.</p>
+    </article>
+
+    <article class="glass">
+      <h3>Инфраструктура</h3>
+      <p>Дороги, жилые дома в 2–3 этажа, небольшой рынок, здание администрации и ресторан быстрого питания «Вкусно — и точка».</p>
+    </article>
+  </div>
+</section>
+
+<section id="news">
+  <div class="heading">
+    <small>02 / СОБЫТИЯ</small>
+    <h2>Новости города</h2>
+  </div>
+
+  <div class="cards">
+    <article class="glass">
+      <h3>Загружаем новости...</h3>
+      <p>Подключаем новостную ленту LUX.</p>
+    </article>
+  </div>
+</section>
+
+<section id="map">
+  <div class="heading">
+    <small>03 / НАВИГАЦИЯ</small>
+    <h2>Карта LUX</h2>
+  </div>
+
+  <div class="glass map">
+    <div class="mapIcon">⌖</div>
+    <h3>Карта города готовится</h3>
+    <p>Когда появится изображение карты Minecraft, здесь будут интерактивные отметки зданий и легенда.</p>
+  </div>
+</section>
+
+<section id="residents">
+  <div class="heading">
+    <small>04 / СООБЩЕСТВО</small>
+    <h2>Жители LUX</h2>
+  </div>
+
+  <div class="glass">
+    <p>Город пока закрыт для жителей. Планируемая дата открытия — 10 ноября (год не указан). Каталог жителей появится после открытия и подключения базы данных.</p>
+  </div>
+</section>
+
+<section id="join">
+  <div class="heading">
+    <small>05 / ПРИСОЕДИНЯЙСЯ</small>
+    <h2>Вступить в LUX</h2>
+  </div>
+
+  <form class="glass form" id="joinForm">
+    <label>
+      Minecraft-ник
+      <input required maxlength="32" placeholder="Твой игровой ник">
+    </label>
+
+    <label>
+      Контакт Telegram
+      <input required placeholder="@username">
+    </label>
+
+    <label>
+      Почему хочешь вступить?
+      <textarea required rows="4" placeholder="Расскажи немного о себе"></textarea>
+    </label>
+
+    <button class="silver">Подготовить заявку</button>
+
+    <p class="hint">Демонстрационная форма: заявка пока не отправляется администрации. Для связи используй официальный Telegram.</p>
+
+    <p id="joinResult" class="result" aria-live="polite"></p>
+  </form>
+</section>
+
+<section id="ai">
+  <div class="heading">
+    <small>06 / ТВОЙ ПОМОЩНИК</small>
+    <h2>LUX AI</h2>
+    <p>Дружелюбный помощник города. SMART MODE · только русский язык.</p>
+  </div>
+
+  <div class="glass aiPanel">
+    <div class="aiAvatar">✦</div>
+    <div>
+      <h3>Привет! Я LUX AI</h3>
+      <p>Могу рассказать о городе, помочь с базовыми вопросами Minecraft и подсказать, где найти официальную информацию.</p>
+    </div>
+    <button class="silver" id="openChat">Открыть LUX AI</button>
+  </div>
+</section>
+
 </main>
-<footer><div class="wrap foot"><div><b style="letter-spacing:.2em;color:white">LUX</b><br>Официальный сайт города<br>Minecraft · AnMine PE</div><div><a href="https://t.me/SkyLUX110" target="_blank" rel="noopener">Telegram LUX ↗</a><br>© LUX</div></div></footer>
-<div class="drawer" id="drawer"><nav><button class="menu" onclick="drawer.classList.remove('open')">Закрыть ×</button><a href="#home">Главная</a><a href="#about">О городе</a><a href="#news">Новости</a><a href="#map">Карта</a><a href="#residents">Жители</a><a href="#join">Вступить</a><a href="#ai">LUX AI</a></nav></div>
-<div class="chat" id="chat"><div class="chathead"><b>🤖 LUX AI · демо</b><button onclick="toggleChat(false)">×</button></div><div class="chatbody" id="chatbody"><div class="bubble">Привет! 👋 Добро пожаловать в LUX. Я пока работаю в демонстрационном режиме.</div></div><div class="chatfoot"><input id="chatText" placeholder="Напиши сообщение…"><button id="send">➤</button></div></div><button class="chat-launch" onclick="toggleChat()">🤖 LUX AI</button>
-<script>
-const drawer=document.getElementById('drawer');document.getElementById('menu').onclick=()=>drawer.classList.add('open');drawer.querySelectorAll('a').forEach(a=>a.onclick=()=>drawer.classList.remove('open'));
-function toggleChat(v){const c=document.getElementById('chat');if(v===true)c.classList.add('open');else if(v===false)c.classList.remove('open');else c.classList.toggle('open')}
-document.getElementById('joinForm').onsubmit=e=>{e.preventDefault();let ok=true;[['nick','nickError','Укажи Minecraft-ник'],['tg','tgError','Укажи Telegram'],['reason','reasonError','Напиши пару слов о себе']].forEach(([id,err,msg])=>{let valid=document.getElementById(id).value.trim();document.getElementById(err).textContent=valid?'':msg;if(!valid)ok=false});if(ok){document.getElementById('joinForm').hidden=true;document.getElementById('success').hidden=false}};
-function send(){const input=document.getElementById('chatText');if(!input.value.trim())return;const user=document.createElement('div');user.className='bubble user';user.textContent=input.value;document.getElementById('chatbody').append(user);input.value='';const answer=document.createElement('div');answer.className='bubble';answer.textContent='Я пока работаю в демонстрационном режиме. Настоящий ИИ подключим на следующем этапе.';document.getElementById('chatbody').append(answer)}document.getElementById('send').onclick=send;document.getElementById('chatText').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
-</script></body></html>
+
+<footer>
+  <a class="logo" href="#home">LUX<span>✦</span></a>
+  <p>Luminous Urban Xperience · Minecraft · AnMine PE</p>
+  <a href="https://t.me/SkyLUX110" target="_blank" rel="noopener">Telegram LUX ↗</a>
+</footer>
+
+<div class="chat" id="chat" aria-label="Чат LUX AI">
+  <div class="chatTop">
+    <b>✦ LUX AI <small>SMART MODE</small></b>
+    <div>
+      <button id="newChat" title="Новый чат">＋</button>
+      <button id="closeChat" title="Закрыть">×</button>
+    </div>
+  </div>
+
+  <div class="chatTools">
+    <button id="historyBtn">История ▾</button>
+    <button id="clearChat">Очистить чат</button>
+  </div>
+
+  <div id="history" class="history hidden"></div>
+  <div id="messages" class="messages" aria-live="polite"></div>
+
+  <form id="chatForm" class="chatForm">
+    <input id="chatInput" maxlength="1000" placeholder="Напиши сообщение…" autocomplete="off" required>
+    <button aria-label="Отправить">➤</button>
+  </form>
+
+  <div class="chatFoot">Локальная версия · ответы по встроенной базе знаний</div>
+</div>
+
+<button class="chatFab" id="chatFab">✦ LUX AI</button>
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+
+<!-- ОСНОВНЫЕ СКРИПТЫ -->
+<script src="app.js"></script>
+<script src="lux.news.js"></script>
+
+</body>
+</html>
+
