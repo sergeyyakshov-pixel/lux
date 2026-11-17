@@ -1,5 +1,3 @@
-
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -10,12 +8,11 @@
   <title>LUX — Luminous Urban Xperience</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <header class="top">
   <a class="logo" href="#home">LUX<span>✦</span></a>
-  <button class="menu" id="menuBtn" aria-label="Открыть меню">☰</button>
+  <button class="menu" id="menuBtn" aria-label="Открыть меню" aria-expanded="false">☰</button>
 
   <nav id="nav">
     <a href="#about">О городе 🏙️</a>
@@ -34,7 +31,10 @@
     <small>LUMINOUS URBAN XPERIENCE</small>
     <h1>ГОРОД,<br><em>КОТОРЫЙ СИЯЕТ</em></h1>
     <p>Добро пожаловать в LUX — уютный Minecraft-город на сервере AnMine PE.</p>
-    <a class="silver" href="#about">Исследовать LUX</a>
+    <div class="heroActions">
+      <a class="silver" href="#about">Исследовать LUX</a>
+      <a class="silver secondarySilver" href="#join">Вступить в LUX</a>
+    </div>
   </div>
   <div class="orb">LUX<span>✦</span></div>
 </section>
@@ -69,11 +69,25 @@
     <h2>Новости города 📰</h2>
   </div>
 
-  <div class="cards">
-    <article class="glass">
-      <h3>Загружаем новости...</h3>
-      <p>Подключаем новостную ленту LUX.</p>
-    </article>
+  <div class="newsCategory">
+    <h3>Новости 📰</h3>
+    <div class="cards" id="newsGeneral">
+      <article class="glass"><p>Загружаем новости...</p></article>
+    </div>
+  </div>
+
+  <div class="newsCategory">
+    <h3>Инфраструктура 🏛️</h3>
+    <div class="cards" id="newsInfrastructure">
+      <article class="glass"><p>Загружаем публикации...</p></article>
+    </div>
+  </div>
+
+  <div class="newsCategory">
+    <h3>Мини-игры 🎮</h3>
+    <div class="cards" id="newsGames">
+      <article class="glass"><p>Загружаем публикации...</p></article>
+    </div>
   </div>
 </section>
 
@@ -124,9 +138,7 @@
     </label>
 
     <button class="silver">Подготовить заявку</button>
-
     <p class="hint">Демонстрационная форма: заявка пока не отправляется администрации. Для связи используй официальный Telegram.</p>
-
     <p id="joinResult" class="result" aria-live="polite"></p>
   </form>
 </section>
@@ -183,14 +195,10 @@
 
 <button class="chatFab" id="chatFab">✦ LUX AI</button>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
-
-<!-- ОСНОВНЫЕ СКРИПТЫ -->
 <script src="app.js"></script>
 <script src="lux.news.js"></script>
 
 </body>
 </html>
-```
