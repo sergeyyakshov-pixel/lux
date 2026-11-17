@@ -1,73 +1,105 @@
-(() => {
-  async function loadNews() {
-    const container = document.querySelector('#news .cards');
 
-    if (!container) {
-      console.error('LUX: контейнер новостей не найден');
-      return;
+(() => {
+  const categories = {
+    "Новости": "newsGeneral",
+    "Инфраструктура": "newsInfrastructure",
+    "Мини-игры": "newsGames"
+  };
+
+  const escapeHTML = value =>
+    String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]);
+
+  function showMessage(container, title, description = "") {
+    container.innerHTML = `
+      <article class="glass">
+        <h3>${escapeHTML(title)}</h3>
+        ${description ? `<p>${escapeHTML(description)}</p>` : ""}
+      </article>
+    `;
+  }
+
+  async function loadNews() {
+    const containers = {};
+
+    for (const [category, id] of Object.entries(categories)) {
+      containers[category] = document.getElementById(id);
+
+      if (!containers[category]) {
+        console.error("LUX: не найден контейнер " + id);
+        return;
+      }
+
+      showMessage(containers[category], "Загружаем...");
     }
 
     const url = window.LUX_SUPABASE_URL;
     const key = window.LUX_SUPABASE_ANON_KEY;
 
     if (!url || !key || !window.supabase?.createClient) {
-      console.error('LUX: Supabase не настроен');
+      Object.values(containers).forEach(container =>
+        showMessage(container, "Новости временно недоступны",
+          "Проверьте подключение к базе данных.")
+      );
+      console.error("LUX: Supabase не настроен");
       return;
     }
-
-    container.innerHTML =
-      '<article class="glass"><h3>Загружаем новости...</h3></article>';
 
     try {
       const db = window.supabase.createClient(url, key);
 
       const { data, error } = await db
-        .from('lux_news')
-        .select('id,title,content,category,created_at')
-        .eq('published', true)
-        .order('created_at', { ascending: false });
+        .from("lux_news")
+        .select("id,title,content,category,created_at")
+        .eq("published", true)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      const escapeHTML = value =>
-        String(value ?? '').replace(/[&<>"']/g, c => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;'
-        })[c]);
+      for (const category of Object.keys(categories)) {
+        const container = containers[category];
+        const items = (data || []).filter(
+          item => (item.category || "Новости") === category
+        );
 
-      if (!data || data.length === 0) {
-        container.innerHTML =
-          '<article class="glass"><h3>Пока нет новостей</h3><p>Следите за обновлениями LUX!</p></article>';
-        return;
+        if (!items.length) {
+          showMessage(container, "Пока нет публикаций",
+            "Следите за обновлениями LUX!");
+          continue;
+        }
+
+        container.innerHTML = items.map(news => `
+          <article class="glass">
+            <span class="pill">${escapeHTML(category)}</span>
+            <h3>${escapeHTML(news.title)}</h3>
+            <p style="white-space:pre-wrap">${escapeHTML(news.content)}</p>
+            <small>${escapeHTML(
+              news.created_at
+                ? new Date(news.created_at).toLocaleDateString("ru-RU")
+                : ""
+            )}</small>
+          </article>
+        `).join("");
       }
-
-      container.innerHTML = data.map(news => `
-        <article class="glass">
-          <span class="pill">${escapeHTML(news.category || 'Новости')}</span>
-          <h3>${escapeHTML(news.title)}</h3>
-          <p style="white-space:pre-wrap">${escapeHTML(news.content)}</p>
-          <small>${escapeHTML(
-            news.created_at
-              ? new Date(news.created_at).toLocaleDateString('ru-RU')
-              : ''
-          )}</small>
-        </article>
-      `).join('');
-
     } catch (error) {
-      console.error('LUX NEWS ERROR:', error);
+      console.error("LUX NEWS ERROR:", error);
 
-      container.innerHTML =
-        '<article class="glass"><h3>Ошибка загрузки новостей</h3><p>Попробуйте обновить страницу позже.</p></article>';
+      Object.values(containers).forEach(container =>
+        showMessage(container, "Ошибка загрузки",
+          "Попробуйте обновить страницу позже.")
+      );
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadNews);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadNews);
   } else {
     loadNews();
   }
 })();
+
