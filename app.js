@@ -12,6 +12,13 @@ try {
 
 let activeId = null;
 
+/* НАСТРОЙКИ SUPABASE */
+
+const SUPABASE_URL = 'https://hxdlrvrymoffsjebereh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_E-FBkXbHAFe9PYVBJZjcCQ_5drtgLhB';
+
+/* СОХРАНЕНИЕ ЧАТОВ */
+
 function persist() {
   try {
     localStorage.setItem(STORE, JSON.stringify(chats));
@@ -76,6 +83,8 @@ function open() {
 
   draw();
 }
+
+/* ОТВЕТЫ LUX AI */
 
 function reply(question) {
   const text = question.toLowerCase();
@@ -145,6 +154,8 @@ function send(text) {
   draw();
 }
 
+/* ИСТОРИЯ ЧАТОВ */
+
 function historyDraw() {
   const history = $('history');
   if (!history) return;
@@ -195,6 +206,253 @@ function historyDraw() {
     row.append(button, actions);
     history.append(row);
   });
+}
+
+/* КАТАЛОГ ЖИТЕЛЕЙ LUX */
+
+function residentsStyles() {
+  if ($('luxResidentsStyles')) return;
+
+  const style = document.createElement('style');
+  style.id = 'luxResidentsStyles';
+
+  style.textContent = `
+    .lux-residents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .lux-resident-card {
+      min-width: 0;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      background: rgba(255,255,255,.045);
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .lux-resident-avatar {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 14px;
+      border-radius: 18px;
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.1);
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .lux-resident-name {
+      margin: 0 0 7px;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .lux-resident-role {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 5px 11px;
+      border-radius: 30px;
+      background: rgba(255,255,255,.09);
+      font-size: 12px;
+    }
+
+    .lux-resident-description {
+      margin: 0;
+      opacity: .78;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .lux-residents-message {
+      padding: 22px;
+      margin-top: 20px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.045);
+      text-align: center;
+      opacity: .85;
+    }
+
+    .lux-residents-retry {
+      margin-top: 12px;
+      padding: 9px 16px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 10px;
+      background: rgba(255,255,255,.08);
+      color: inherit;
+      cursor: pointer;
+    }
+  `;
+
+  document.head.append(style);
+}
+
+function getResidentsContainer() {
+  const section = $('residents');
+  if (!section) return null;
+
+  let container = $('residentsList');
+
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'residentsList';
+
+    const oldContent = section.querySelector('.glass');
+
+    if (oldContent) {
+      oldContent.replaceWith(container);
+    } else {
+      section.append(container);
+    }
+  }
+
+  return container;
+}
+
+function showResidentsMessage(container, message, retry = false) {
+  container.innerHTML = '';
+
+  const box = document.createElement('div');
+  box.className = 'lux-residents-message';
+
+  const text = document.createElement('p');
+  text.textContent = message;
+  box.append(text);
+
+  if (retry) {
+    const button = document.createElement('button');
+    button.className = 'lux-residents-retry';
+    button.textContent = 'Попробовать снова';
+    button.addEventListener('click', loadResidents);
+    box.append(button);
+  }
+
+  container.append(box);
+}
+
+function createResidentCard(resident) {
+  const card = document.createElement('article');
+  card.className = 'lux-resident-card';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'lux-resident-avatar';
+
+  if (resident.avatar_url) {
+    const image = document.createElement('img');
+
+    image.src = resident.avatar_url;
+    image.alt = `Аватар ${resident.minecraft_nick}`;
+    image.className = 'lux-resident-avatar';
+
+    image.addEventListener('error', () => {
+      image.replaceWith(createResidentFallback(resident.minecraft_nick));
+    });
+
+    avatar.replaceWith(image);
+  } else {
+    avatar.textContent = getInitials(resident.minecraft_nick);
+    card.append(avatar);
+  }
+
+  const name = document.createElement('h3');
+  name.className = 'lux-resident-name';
+  name.textContent = resident.minecraft_nick || 'Без ника';
+
+  const role = document.createElement('div');
+  role.className = 'lux-resident-role';
+  role.textContent = resident.role || 'Житель';
+
+  card.append(name, role);
+
+  if (resident.description) {
+    const description = document.createElement('p');
+    description.className = 'lux-resident-description';
+    description.textContent = resident.description;
+    card.append(description);
+  }
+
+  return card;
+}
+
+function getInitials(nick) {
+  const value = String(nick || '?').trim();
+  return value.slice(0, 2).toUpperCase() || '?';
+}
+
+function createResidentFallback(nick) {
+  const fallback = document.createElement('div');
+  fallback.className = 'lux-resident-avatar';
+  fallback.textContent = getInitials(nick);
+  return fallback;
+}
+
+async function loadResidents() {
+  const container = getResidentsContainer();
+  if (!container) return;
+
+  residentsStyles();
+
+  showResidentsMessage(container, 'Загружаем каталог жителей LUX...');
+
+  const endpoint =
+    `${SUPABASE_URL}/rest/v1/residents` +
+    '?select=minecraft_nick,role,description,avatar_url,is_active' +
+    '&is_active=eq.true' +
+    '&order=joined_at.asc';
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Accept: 'application/json'
+      },
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      const details = await response.text();
+      console.error('LUX: ошибка загрузки жителей', response.status, details);
+      throw new Error('Не удалось получить список жителей.');
+    }
+
+    const residents = await response.json();
+
+    container.innerHTML = '';
+
+    if (!Array.isArray(residents) || residents.length === 0) {
+      showResidentsMessage(
+        container,
+        'В каталоге пока нет жителей. Когда администрация добавит первых участников, они появятся здесь.'
+      );
+      return;
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'lux-residents-grid';
+
+    residents.forEach(resident => {
+      grid.append(createResidentCard(resident));
+    });
+
+    container.append(grid);
+
+  } catch (error) {
+    console.error('LUX: каталог жителей недоступен', error);
+
+    showResidentsMessage(
+      container,
+      'Не удалось загрузить каталог жителей. Попробуй немного позже.',
+      true
+    );
+  }
 }
 
 /* ЧАТ LUX AI */
@@ -271,4 +529,12 @@ if (menuBtn && nav) {
       menuBtn.textContent = '☰';
     });
   });
+}
+
+/* ЗАПУСК КАТАЛОГА */
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadResidents);
+} else {
+  loadResidents();
 }
