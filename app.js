@@ -1,4 +1,23 @@
+
+/* ==========================================
+   LUX — MAIN APP.JS
+   Luminous Urban Xperience
+========================================== */
+
 const $ = id => document.getElementById(id);
+
+/* SUPABASE */
+
+const SUPABASE_URL = 'https://hxdlrvrymoffsjebereh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_E-FBkXbHAFe9PYVBJZjcCQ_5drtgLhB';
+
+const supabase = window.supabase?.createClient
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
+
+/* ==========================================
+   LUX AI — ИСТОРИЯ ЧАТОВ
+========================================== */
 
 const STORE = 'lux_ai_chats_v2';
 
@@ -6,25 +25,23 @@ let chats = [];
 
 try {
   chats = JSON.parse(localStorage.getItem(STORE) || '[]');
+  if (!Array.isArray(chats)) chats = [];
 } catch {
   chats = [];
 }
 
 let activeId = null;
 
-/* НАСТРОЙКИ SUPABASE */
-
-const SUPABASE_URL = 'https://hxdlrvrymoffsjebereh.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_E-FBkXbHAFe9PYVBJZjcCQ_5drtgLhB';
-
-/* СОХРАНЕНИЕ ЧАТОВ */
-
 function persist() {
   try {
     localStorage.setItem(STORE, JSON.stringify(chats));
   } catch (error) {
-    console.error('LUX AI: ошибка сохранения истории', error);
+    console.error('LUX AI: ошибка сохранения', error);
   }
+}
+
+function current() {
+  return chats.find(chat => chat.id === activeId);
 }
 
 function createChat() {
@@ -36,12 +53,9 @@ function createChat() {
 
   chats.unshift(chat);
   activeId = chat.id;
+
   persist();
   draw();
-}
-
-function current() {
-  return chats.find(chat => chat.id === activeId);
 }
 
 function draw() {
@@ -57,7 +71,7 @@ function draw() {
     return;
   }
 
-  for (const message of chat.messages) {
+  chat.messages.forEach(message => {
     const element = document.createElement('div');
 
     element.className =
@@ -65,7 +79,7 @@ function draw() {
 
     element.textContent = message.text;
     box.append(element);
-  }
+  });
 
   box.scrollTop = box.scrollHeight;
 }
@@ -90,42 +104,46 @@ function reply(question) {
   const text = question.toLowerCase();
 
   if (/привет|здравств|хай|добрый/.test(text)) {
-    return 'Привет! 👋 Я LUX AI — дружелюбный помощник. Спрашивай о городе LUX или Minecraft.';
+    return 'Привет! 👋 Я LUX AI — официальный помощник города LUX. Чем могу помочь?';
   }
 
   if (/кто основател|основател|администрац/.test(text)) {
-    return 'Основатели и главные администраторы LUX: GienaSergo01 и XXOmegaRavenXX.';
+    return 'Основатели и главные администраторы города LUX:\n\n👑 GienaSergo01\n👑 XXOmegaRavenXX';
   }
 
-  if (/истори|когда появился|когда основан|появилс/.test(text)) {
-    return 'Идея создать LUX появилась весной 2026 года по предложению GienaSergo01. Раньше LUX был небольшим магазином, который позже разросся в город.';
+  if (/истори|когда появился|когда основан/.test(text)) {
+    return 'LUX появился благодаря идее GienaSergo01 весной 2026 года. Изначально это был небольшой магазин, который впоследствии превратился в город.';
   }
 
   if (/правил|грифер|вороват|ломать/.test(text)) {
-    return 'В городе запрещено гриферить, воровать чужие ресурсы и ломать городские постройки и инфраструктуру. За нарушение предусмотрено предупреждение.';
+    return 'Правила города LUX:\n\n1. Запрещено гриферить.\n2. Запрещено воровать чужие ресурсы.\n3. Запрещено ломать городские постройки и инфраструктуру.\n\nЗа нарушение предусмотрено предупреждение.';
   }
 
   if (/телеграм|telegram|связаться/.test(text)) {
-    return 'Официальное Telegram-сообщество LUX: https://t.me/SkyLUX110';
+    return 'Официальное Telegram-сообщество LUX:\nhttps://t.me/SkyLUX110';
   }
 
-  if (/рын|ресторан|вкусно/.test(text)) {
-    return 'В LUX есть небольшой рынок с разными категориями товаров, а также ресторан быстрого питания «Вкусно — и точка». Цены и ассортимент пока не указаны.';
+  if (/рын|магазин|ресторан|вкусно/.test(text)) {
+    return 'В городе LUX есть небольшой рынок, множество различных магазинов, а также ресторан быстрого питания «Вкусно — и точка». 🏙️';
+  }
+
+  if (/открыти|откроется|когда откро/.test(text)) {
+    return 'Город LUX уже открыт! 🏙️ Жители могут вступать в город через подачу заявки.';
+  }
+
+  if (/жител|каталог|паспорт/.test(text)) {
+    return 'В LUX предусмотрен каталог жителей. В нём можно посмотреть Minecraft-ники, должности и информацию об участниках города.';
   }
 
   if (/транспорт|автобус|машин|мотоцикл/.test(text)) {
     return 'В городе предусмотрены легковые автомобили, грузовики, автобусы и мотоциклы.';
   }
 
-  if (/открыти|откроется|когда откро/.test(text)) {
-    return 'Планируемая дата открытия города LUX — 18 ноября 2026 года (ориентировочно). Следи за официальными объявлениями.';
-  }
-
   if (/minecraft|майнкрафт|выжив|строительств|крафт|команд/.test(text)) {
-    return 'Помогу с Minecraft! Напиши, что именно нужно: строительство, выживание, команды или игровые механики. Для особенностей сервера AnMine PE лучше сверяться с его правилами.';
+    return 'Помогу с Minecraft! Напиши, что именно тебя интересует.';
   }
 
-  return 'Пока я работаю в демонстрационном SMART MODE и отвечаю по встроенной базе знаний. У меня ещё нет полноценной нейросети и доступа к интернету. Если вопрос касается неизвестных фактов о LUX, уточни его у администрации города.';
+  return 'Пока я работаю в демонстрационном SMART MODE и отвечаю по встроенной базе знаний. Если информации недостаточно, обратись к администрации LUX.';
 }
 
 function send(text) {
@@ -178,11 +196,10 @@ function historyDraw() {
 
     const actions = document.createElement('button');
     actions.textContent = '⋯';
-    actions.title = 'Действия';
 
     actions.onclick = () => {
       const answer = prompt(
-        'Введи новое название чата или оставь пустым для удаления:',
+        'Новое название чата. Оставь пустым для удаления:',
         chat.title
       );
 
@@ -190,7 +207,7 @@ function historyDraw() {
 
       if (answer.trim()) {
         chat.title = answer.trim().slice(0, 50);
-      } else if (confirm('Удалить этот чат?')) {
+      } else if (confirm('Удалить чат?')) {
         chats = chats.filter(item => item.id !== chat.id);
 
         if (activeId === chat.id) {
@@ -208,7 +225,12 @@ function historyDraw() {
   });
 }
 
-/* КАТАЛОГ ЖИТЕЛЕЙ LUX */
+/* ==========================================
+   КАТАЛОГ ЖИТЕЛЕЙ LUX
+========================================== */
+
+let residents = [];
+let filteredResidents = [];
 
 function residentsStyles() {
   if ($('luxResidentsStyles')) return;
@@ -217,245 +239,545 @@ function residentsStyles() {
   style.id = 'luxResidentsStyles';
 
   style.textContent = `
+    .lux-resident-controls {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .lux-resident-controls input,
+    .lux-resident-controls select {
+      min-width: 0;
+      width: 100%;
+      padding: 13px 15px;
+      color: #eef4ff;
+      background: #0b1830;
+      border: 1px solid #8bc5ff55;
+      border-radius: 12px;
+      font: inherit;
+      outline: none;
+    }
+
+    .lux-resident-controls input:focus,
+    .lux-resident-controls select:focus {
+      border-color: #8bc5ff;
+    }
+
+    .lux-resident-controls select option {
+      background: #101b30;
+    }
+
+    .lux-residents-count {
+      margin: 12px 0;
+      color: #a9c9ef;
+      font-size: 13px;
+    }
+
     .lux-residents-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit,minmax(230px,1fr));
       gap: 18px;
-      margin-top: 22px;
+      margin-top: 18px;
     }
 
     .lux-resident-card {
-      min-width: 0;
       padding: 20px;
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 18px;
-      background: rgba(255,255,255,.045);
+      border: 1px solid #8bc5ff55;
+      border-radius: 19px;
+      background: linear-gradient(145deg,#152b4b,#0b162b);
       text-align: center;
-      overflow-wrap: anywhere;
+      transition: transform .2s,border-color .2s;
+    }
+
+    .lux-resident-card:hover {
+      transform: translateY(-4px);
+      border-color: #8bc5ff;
     }
 
     .lux-resident-avatar {
-      width: 88px;
-      height: 88px;
-      margin: 0 auto 14px;
-      border-radius: 18px;
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 13px;
+      border-radius: 17px;
       object-fit: cover;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,.1);
+      display: grid;
+      place-items: center;
+      background: #1c3557;
+      border: 1px solid #8bc5ff70;
+      color: #dceaff;
       font-size: 30px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .lux-resident-name {
-      margin: 0 0 7px;
       font-size: 19px;
-      font-weight: 700;
+      margin: 5px 0;
+      overflow-wrap: anywhere;
     }
 
     .lux-resident-role {
       display: inline-block;
-      margin-bottom: 12px;
-      padding: 5px 11px;
+      padding: 5px 12px;
+      margin: 7px 0;
+      border: 1px solid #8bc5ff70;
       border-radius: 30px;
-      background: rgba(255,255,255,.09);
+      background: #8bc5ff15;
+      color: #b9d9ff;
       font-size: 12px;
     }
 
-    .lux-resident-description {
-      margin: 0;
-      opacity: .78;
-      font-size: 14px;
-      line-height: 1.5;
+    .lux-passport-button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 11px;
+      border: 1px solid #b7d8ff;
+      border-radius: 11px;
+      background: linear-gradient(120deg,#eaf4ff,#a9c9ef);
+      color: #10213b;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .lux-passport-button:hover {
+      filter: brightness(1.08);
     }
 
     .lux-residents-message {
-      padding: 22px;
-      margin-top: 20px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.045);
+      padding: 25px;
+      border: 1px solid #8bc5ff40;
+      border-radius: 18px;
+      background: #101b30;
       text-align: center;
-      opacity: .85;
+      color: #b9cce5;
     }
 
-    .lux-residents-retry {
-      margin-top: 12px;
-      padding: 9px 16px;
-      border: 1px solid rgba(255,255,255,.2);
-      border-radius: 10px;
-      background: rgba(255,255,255,.08);
-      color: inherit;
+    /* ЦИФРОВОЙ ПАСПОРТ */
+
+    .passportModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .passportModal.active {
+      display: flex;
+    }
+
+    .passportOverlay {
+      position: absolute;
+      inset: 0;
+      background: #020712dc;
+      backdrop-filter: blur(8px);
+    }
+
+    .passportWindow {
+      position: relative;
+      z-index: 1;
+      width: min(520px,100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 12px;
+      border: 1px solid #a6d0ff80;
+      border-radius: 23px;
+      background: #0a1427;
+      box-shadow: 0 20px 80px #000b;
+    }
+
+    .passportClose {
+      position: sticky;
+      top: 0;
+      float: right;
+      z-index: 2;
+      width: 38px;
+      height: 38px;
+      border: 1px solid #8bc5ff60;
+      border-radius: 50%;
+      background: #152b49;
+      color: white;
+      font-size: 23px;
       cursor: pointer;
+    }
+
+    .passportDocument {
+      padding: 25px;
+      margin-top: 28px;
+      border: 1px solid #8bc5ff80;
+      border-radius: 18px;
+      background: linear-gradient(145deg,#17385d,#0a1830 70%);
+    }
+
+    .passportHeader {
+      text-align: center;
+      padding-bottom: 17px;
+      border-bottom: 1px solid #a9d0ff55;
+    }
+
+    .passportHeader small {
+      color: #a9d0ff;
+      letter-spacing: 2px;
+    }
+
+    .passportHeader h2 {
+      margin: 7px 0;
+      color: #edf6ff;
+      font-size: 23px;
+    }
+
+    .passportPortrait {
+      width: 115px;
+      height: 115px;
+      margin: 22px auto;
+      display: grid;
+      place-items: center;
+      border: 2px solid #a9d0ff;
+      border-radius: 16px;
+      background: #27466b;
+      object-fit: cover;
+      color: white;
+      font-size: 38px;
+      font-weight: 800;
+    }
+
+    .passportField {
+      padding: 12px 0;
+      border-bottom: 1px solid #a9d0ff30;
+    }
+
+    .passportField small {
+      display: block;
+      color: #a9c9ef;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .passportField strong {
+      display: block;
+      margin-top: 4px;
+      color: #fff;
+      overflow-wrap: anywhere;
+    }
+
+    .passportFooter {
+      padding-top: 18px;
+      text-align: center;
+      color: #a9c9ef;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    @media(max-width:600px) {
+      .lux-resident-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .passportDocument {
+        padding: 17px;
+      }
     }
   `;
 
   document.head.append(style);
 }
 
-function getResidentsContainer() {
-  const section = $('residents');
-  if (!section) return null;
+/* Создание окна паспорта */
 
-  let container = $('residentsList');
+function ensurePassportModal() {
+  if ($('passportModal')) return;
 
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'residentsList';
+  const modal = document.createElement('div');
+  modal.id = 'passportModal';
+  modal.className = 'passportModal';
 
-    const oldContent = section.querySelector('.glass');
+  modal.innerHTML = `
+    <div class="passportOverlay" id="passportOverlay"></div>
 
-    if (oldContent) {
-      oldContent.replaceWith(container);
-    } else {
-      section.append(container);
-    }
-  }
+    <div class="passportWindow">
+      <button class="passportClose" id="passportClose"
+        aria-label="Закрыть">×</button>
 
-  return container;
+      <div id="passportContent"></div>
+    </div>
+  `;
+
+  document.body.append(modal);
+
+  $('passportClose').addEventListener('click', closePassport);
+  $('passportOverlay').addEventListener('click', closePassport);
 }
 
-function showResidentsMessage(container, message, retry = false) {
-  container.innerHTML = '';
+function closePassport() {
+  $('passportModal')?.classList.remove('active');
+  document.body.style.overflow = '';
+}
 
-  const box = document.createElement('div');
-  box.className = 'lux-residents-message';
+function getInitials(nick) {
+  return String(nick || '?').trim().slice(0, 2).toUpperCase();
+}
 
-  const text = document.createElement('p');
-  text.textContent = message;
-  box.append(text);
+function safeDate(date) {
+  if (!date) return 'Не указана';
 
-  if (retry) {
-    const button = document.createElement('button');
-    button.className = 'lux-residents-retry';
-    button.textContent = 'Попробовать снова';
-    button.addEventListener('click', loadResidents);
-    box.append(button);
+  const value = new Date(date);
+
+  if (Number.isNaN(value.getTime())) return 'Не указана';
+
+  return value.toLocaleDateString('ru-RU');
+}
+
+/* Открытие цифрового паспорта */
+
+function openPassport(resident) {
+  ensurePassportModal();
+
+  const content = $('passportContent');
+  if (!content) return;
+
+  content.innerHTML = '';
+
+  const documentBox = document.createElement('div');
+  documentBox.className = 'passportDocument';
+
+  const header = document.createElement('div');
+  header.className = 'passportHeader';
+
+  header.innerHTML = `
+    <small>LUMINOUS URBAN XPERIENCE</small>
+    <h2>ПАСПОРТ ЖИТЕЛЯ</h2>
+    <small>ГОРОД LUX · ANMINE PE</small>
+  `;
+
+  documentBox.append(header);
+
+  const portrait = document.createElement(
+    resident.avatar_url ? 'img' : 'div'
+  );
+
+  portrait.className = 'passportPortrait';
+
+  if (resident.avatar_url) {
+    portrait.src = resident.avatar_url;
+    portrait.alt = 'Аватар жителя';
+
+    portrait.onerror = () => {
+      const fallback = document.createElement('div');
+      fallback.className = 'passportPortrait';
+      fallback.textContent = getInitials(resident.minecraft_nick);
+      portrait.replaceWith(fallback);
+    };
+  } else {
+    portrait.textContent = getInitials(resident.minecraft_nick);
   }
 
-  container.append(box);
+  documentBox.append(portrait);
+
+  const fields = [
+    ['Игровой ник', resident.minecraft_nick],
+    ['Должность', resident.role || 'Житель'],
+    ['Дата вступления', safeDate(resident.joined_at)],
+    ['Статус', resident.is_active ? 'Активный житель' : 'Неактивный житель'],
+    ['Telegram', resident.telegram || 'Не указан'],
+    ['Информация', resident.description || 'Дополнительная информация отсутствует']
+  ];
+
+  fields.forEach(([label, value]) => {
+    const field = document.createElement('div');
+    field.className = 'passportField';
+
+    const small = document.createElement('small');
+    small.textContent = label;
+
+    const strong = document.createElement('strong');
+    strong.textContent = value || 'Не указано';
+
+    field.append(small, strong);
+    documentBox.append(field);
+  });
+
+  const footer = document.createElement('div');
+  footer.className = 'passportFooter';
+  footer.textContent = 'LUX ✦ LUMINOUS URBAN XPERIENCE';
+
+  documentBox.append(footer);
+  content.append(documentBox);
+
+  $('passportModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
+
+/* Создание карточки жителя */
 
 function createResidentCard(resident) {
   const card = document.createElement('article');
   card.className = 'lux-resident-card';
 
-  const avatar = document.createElement('div');
+  const avatar = document.createElement(
+    resident.avatar_url ? 'img' : 'div'
+  );
+
   avatar.className = 'lux-resident-avatar';
 
   if (resident.avatar_url) {
-    const image = document.createElement('img');
+    avatar.src = resident.avatar_url;
+    avatar.alt = `Аватар ${resident.minecraft_nick}`;
 
-    image.src = resident.avatar_url;
-    image.alt = `Аватар ${resident.minecraft_nick}`;
-    image.className = 'lux-resident-avatar';
-
-    image.addEventListener('error', () => {
-      image.replaceWith(createResidentFallback(resident.minecraft_nick));
-    });
-
-    avatar.replaceWith(image);
+    avatar.onerror = () => {
+      const fallback = document.createElement('div');
+      fallback.className = 'lux-resident-avatar';
+      fallback.textContent = getInitials(resident.minecraft_nick);
+      avatar.replaceWith(fallback);
+    };
   } else {
     avatar.textContent = getInitials(resident.minecraft_nick);
-    card.append(avatar);
   }
 
   const name = document.createElement('h3');
   name.className = 'lux-resident-name';
-  name.textContent = resident.minecraft_nick || 'Без ника';
+  name.textContent = resident.minecraft_nick;
 
   const role = document.createElement('div');
   role.className = 'lux-resident-role';
   role.textContent = resident.role || 'Житель';
 
-  card.append(name, role);
+  const button = document.createElement('button');
+  button.className = 'lux-passport-button';
+  button.textContent = 'Открыть паспорт 🪪';
 
-  if (resident.description) {
-    const description = document.createElement('p');
-    description.className = 'lux-resident-description';
-    description.textContent = resident.description;
-    card.append(description);
-  }
+  button.addEventListener('click', () => openPassport(resident));
+
+  card.append(avatar, name, role, button);
 
   return card;
 }
 
-function getInitials(nick) {
-  const value = String(nick || '?').trim();
-  return value.slice(0, 2).toUpperCase() || '?';
+/* Поиск и фильтрация */
+
+function filterResidents() {
+  const search = ($('residentSearch')?.value || '')
+    .trim()
+    .toLowerCase();
+
+  const selectedRole = $('residentRoleFilter')?.value || '';
+
+  filteredResidents = residents.filter(resident => {
+    const nick = String(resident.minecraft_nick || '').toLowerCase();
+    const role = resident.role || 'Житель';
+
+    return nick.includes(search) &&
+      (!selectedRole || role === selectedRole);
+  });
+
+  renderResidents();
 }
 
-function createResidentFallback(nick) {
-  const fallback = document.createElement('div');
-  fallback.className = 'lux-resident-avatar';
-  fallback.textContent = getInitials(nick);
-  return fallback;
+function renderResidents() {
+  const container = $('residentsList');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const count = $('residentsCount');
+
+  if (count) {
+    count.textContent =
+      `Найдено жителей: ${filteredResidents.length}`;
+  }
+
+  if (!filteredResidents.length) {
+    const message = document.createElement('div');
+    message.className = 'lux-residents-message';
+    message.textContent = residents.length
+      ? 'По твоему запросу никого не найдено.'
+      : 'В каталоге пока нет жителей.';
+
+    container.append(message);
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'lux-residents-grid';
+
+  filteredResidents.forEach(resident => {
+    grid.append(createResidentCard(resident));
+  });
+
+  container.append(grid);
 }
+
+/* Загрузка из Supabase */
 
 async function loadResidents() {
-  const container = getResidentsContainer();
+  const container = $('residentsList');
   if (!container) return;
 
   residentsStyles();
+  ensurePassportModal();
 
-  showResidentsMessage(container, 'Загружаем каталог жителей LUX...');
+  container.innerHTML = `
+    <div class="lux-residents-message">
+      Загружаем каталог жителей LUX...
+    </div>
+  `;
 
-  const endpoint =
-    `${SUPABASE_URL}/rest/v1/residents` +
-    '?select=minecraft_nick,role,description,avatar_url,is_active' +
-    '&is_active=eq.true' +
-    '&order=joined_at.asc';
+  if (!supabase) {
+    container.innerHTML = `
+      <div class="lux-residents-message">
+        Не удалось подключить Supabase.
+        Проверь подключение библиотеки и настройки.
+      </div>
+    `;
+    return;
+  }
 
   try {
-    const response = await fetch(endpoint, {
-      method: 'GET',
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        Accept: 'application/json'
-      },
-      cache: 'no-store'
-    });
+    const { data, error } = await supabase
+      .from('residents')
+      .select('id,minecraft_nick,telegram,role,description,avatar_url,joined_at,is_active')
+      .eq('is_active', true)
+      .order('joined_at', { ascending: true });
 
-    if (!response.ok) {
-      const details = await response.text();
-      console.error('LUX: ошибка загрузки жителей', response.status, details);
-      throw new Error('Не удалось получить список жителей.');
-    }
+    if (error) throw error;
 
-    const residents = await response.json();
+    const founders = [
+      'gienasergo01',
+      'xxomegaravenxx'
+    ];
 
-    container.innerHTML = '';
-
-    if (!Array.isArray(residents) || residents.length === 0) {
-      showResidentsMessage(
-        container,
-        'В каталоге пока нет жителей. Когда администрация добавит первых участников, они появятся здесь.'
+    residents = (data || []).filter(resident => {
+      return !founders.includes(
+        String(resident.minecraft_nick || '').toLowerCase()
       );
-      return;
-    }
-
-    const grid = document.createElement('div');
-    grid.className = 'lux-residents-grid';
-
-    residents.forEach(resident => {
-      grid.append(createResidentCard(resident));
     });
 
-    container.append(grid);
+    filterResidents();
 
   } catch (error) {
-    console.error('LUX: каталог жителей недоступен', error);
+    console.error('LUX: ошибка загрузки жителей:', error);
 
-    showResidentsMessage(
-      container,
-      'Не удалось загрузить каталог жителей. Попробуй немного позже.',
-      true
-    );
+    container.innerHTML = `
+      <div class="lux-residents-message">
+        Не удалось загрузить каталог жителей.
+        <br>
+        Проверь таблицу residents и настройки RLS.
+        <br>
+        <button class="lux-passport-button" id="residentRetry">
+          Попробовать снова
+        </button>
+      </div>
+    `;
+
+    $('residentRetry')?.addEventListener('click', loadResidents);
   }
 }
 
-/* ЧАТ LUX AI */
+/* ==========================================
+   ЗАПУСК ЧАТА
+========================================== */
 
 $('chatForm')?.addEventListener('submit', event => {
   event.preventDefault();
@@ -488,7 +810,9 @@ $('clearChat')?.addEventListener('click', () => {
   }
 });
 
-/* ФОРМА ВСТУПЛЕНИЯ */
+/* ==========================================
+   ФОРМА ВСТУПЛЕНИЯ
+========================================== */
 
 $('joinForm')?.addEventListener('submit', event => {
   event.preventDefault();
@@ -497,11 +821,13 @@ $('joinForm')?.addEventListener('submit', event => {
 
   if (result) {
     result.textContent =
-      'Форма проверена. Автоматическая отправка заявок пока не подключена. Напиши администрации через https://t.me/SkyLUX110';
+      'Форма проверена. Для отправки заявки свяжись с администрацией LUX: https://t.me/SkyLUX110';
   }
 });
 
-/* МОБИЛЬНОЕ МЕНЮ */
+/* ==========================================
+   МОБИЛЬНОЕ МЕНЮ
+========================================== */
 
 const menuBtn = $('menuBtn');
 const nav = $('nav');
@@ -511,7 +837,6 @@ if (menuBtn && nav) {
     const isOpen = nav.classList.toggle('show');
 
     menuBtn.setAttribute('aria-expanded', String(isOpen));
-
     menuBtn.setAttribute(
       'aria-label',
       isOpen ? 'Закрыть меню' : 'Открыть меню'
@@ -523,7 +848,6 @@ if (menuBtn && nav) {
   nav.querySelectorAll('a').forEach(link => {
     link.addEventListener('click', () => {
       nav.classList.remove('show');
-
       menuBtn.setAttribute('aria-expanded', 'false');
       menuBtn.setAttribute('aria-label', 'Открыть меню');
       menuBtn.textContent = '☰';
@@ -531,10 +855,30 @@ if (menuBtn && nav) {
   });
 }
 
-/* ЗАПУСК КАТАЛОГА */
+/* ЗАКРЫТИЕ ПАСПОРТА ПО ESC */
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    closePassport();
+  }
+});
+
+/* ==========================================
+   ЗАПУСК
+========================================== */
+
+function initializeLux() {
+  residentsStyles();
+  ensurePassportModal();
+
+  $('residentSearch')?.addEventListener('input', filterResidents);
+  $('residentRoleFilter')?.addEventListener('change', filterResidents);
+
+  loadResidents();
+}
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadResidents);
+  document.addEventListener('DOMContentLoaded', initializeLux);
 } else {
-  loadResidents();
+  initializeLux();
 }
