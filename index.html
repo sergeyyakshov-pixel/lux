@@ -41,24 +41,26 @@
 
 <section id="about">
   <div class="heading">
-    <small>01 / ОТКРЫТИЕ</small>
+    <small>01 / О ГОРОДЕ</small>
     <h2>О городе LUX 🏙️</h2>
   </div>
 
   <div class="cards">
     <article class="glass">
       <h3>История 📰</h3>
-      <p>LUX — это небольшой городок на сервере AnMine PE Владуса. Раньше этот город был небольшим магазином, но позже разросся в город. Идея создания города пришла GienaSergo01 весной 2026 года, а название нашли в интернете. 🌱</p>
+      <p>LUX — небольшой город на сервере AnMine PE Владуса. Раньше он был небольшим магазином, но со временем вырос в город. Идея создания появилась весной 2026 года по предложению GienaSergo01.</p>
     </article>
 
     <article class="glass">
       <h3>Основатели 👑</h3>
-      <p><b>GienaSergo01</b><br><b>XXOmegaRavenXX</b><br>Основатели и главные администраторы города.</p>
+      <p><b>GienaSergo01</b><br>
+      <b>XXOmegaRavenXX</b><br>
+      Основатели и главные администраторы города.</p>
     </article>
 
     <article class="glass">
-      <h3>Достопримечательности 🏛️</h3>
-      <p>Дороги, жилые дома в 2–3 этажа, небольшой рынок, здание администрации и ресторан быстрого питания «Вкусно — и точка».</p>
+      <h3>Инфраструктура 🏛️</h3>
+      <p>Жилые дома высотой 2–3 этажа, небольшой рынок, различные магазины, здание администрации и ресторан быстрого питания «Вкусно — и точка».</p>
     </article>
   </div>
 </section>
@@ -94,13 +96,20 @@
 <section id="map">
   <div class="heading">
     <small>03 / НАВИГАЦИЯ</small>
-    <h2>Карта Города 🗺️</h2>
+    <h2>Карта города 🗺️</h2>
   </div>
 
   <div class="glass map">
     <div class="mapIcon">⌖</div>
-    <h3>Карта города готовится</h3>
-    <p>Когда появится изображение карты Minecraft, здесь будут интерактивные отметки зданий и легенда.</p>
+    <h3>Карта города LUX</h3>
+    <p>Карта не точная!</p>
+    <img
+      id="luxCityMap"
+      src="images/lux-map.png"
+      alt="Карта города LUX"
+      style="width:100%;max-width:1000px;border-radius:15px;margin-top:15px"
+      onerror="this.style.display='none'"
+    >
   </div>
 </section>
 
@@ -113,6 +122,7 @@
 
   <div class="residentsFounders">
     <h3>Основатели города 👑</h3>
+
     <div class="cards">
       <article class="glass residentCard">
         <div class="residentAvatar">G</div>
@@ -129,10 +139,31 @@
   </div>
 
   <div class="residentsCatalog">
-    <h3>Жители города 🏘️</h3>
-    <div class="cards" id="residentsList">
+    <h3>Каталог жителей 🪪</h3>
+    <p>Найди жителя и открой его цифровой паспорт.</p>
+
+    <div class="lux-resident-controls">
+      <input
+        id="residentSearch"
+        type="search"
+        placeholder="Поиск по Minecraft-нику..."
+        autocomplete="off"
+      >
+      <select id="residentRoleFilter">
+        <option value="">Все должности</option>
+        <option value="Заместитель мэра">Заместитель мэра</option>
+        <option value="Архитектор">Архитектор</option>
+        <option value="Полицейский">Полицейский</option>
+        <option value="Продавец">Продавец</option>
+        <option value="Житель">Житель</option>
+      </select>
+    </div>
+
+    <div id="residentsCount" class="lux-residents-count"></div>
+
+    <div id="residentsList">
       <article class="glass">
-        <p>Каталог жителей будет загружен после подключения базы данных.</p>
+        <p>Загружаем каталог жителей...</p>
       </article>
     </div>
   </div>
@@ -161,7 +192,7 @@
     </label>
 
     <button class="silver">Подготовить заявку</button>
-    <p class="hint">Демонстрационная форма: заявка пока не отправляется администрации. Для связи используй официальный Telegram.</p>
+    <p class="hint">Демонстрационная форма. Для отправки заявки свяжись с администрацией.</p>
     <p id="joinResult" class="result" aria-live="polite"></p>
   </form>
 </section>
@@ -170,14 +201,14 @@
   <div class="heading">
     <small>06 / ТВОЙ ПОМОЩНИК</small>
     <h2>LUX AI 🤖</h2>
-    <p>Дружелюбный помощник города. SMART MODE · только русский язык.</p>
+    <p>Дружелюбный помощник города. SMART MODE · русский язык.</p>
   </div>
 
   <div class="glass aiPanel">
     <div class="aiAvatar">✦</div>
     <div>
       <h3>Привет! Я LUX AI</h3>
-      <p>Могу рассказать о городе, помочь с базовыми вопросами Minecraft и подсказать, где найти официальную информацию.</p>
+      <p>Могу рассказать о городе и помочь с базовыми вопросами Minecraft.</p>
     </div>
     <button class="silver" id="openChat">Открыть LUX AI</button>
   </div>
@@ -209,11 +240,11 @@
   <div id="messages" class="messages" aria-live="polite"></div>
 
   <form id="chatForm" class="chatForm">
-    <input id="chatInput" maxlength="1000" placeholder="Напиши сообщение…" autocomplete="off" required>
+    <input id="chatInput" maxlength="1000" placeholder="Напиши сообщение..." autocomplete="off" required>
     <button aria-label="Отправить">➤</button>
   </form>
 
-  <div class="chatFoot">Локальная версия · ответы по встроенной базе знаний</div>
+  <div class="chatFoot">Локальная версия · встроенная база знаний</div>
 </div>
 
 <button class="chatFab" id="chatFab">✦ LUX AI</button>
