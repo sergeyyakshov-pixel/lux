@@ -48,19 +48,30 @@
   <div class="cards">
     <article class="glass">
       <h3>История 📰</h3>
-      <p>LUX — небольшой город на сервере AnMine PE Владуса. Раньше он был небольшим магазином, но со временем вырос в город. Идея создания появилась весной 2026 года по предложению GienaSergo01.</p>
+      <p>
+        LUX — небольшой город на сервере AnMine PE Владуса.
+        Раньше он был небольшим магазином, но со временем вырос
+        в город. Идея создания появилась весной 2026 года
+        по предложению GienaSergo01.
+      </p>
     </article>
 
     <article class="glass">
       <h3>Основатели 👑</h3>
-      <p><b>GienaSergo01</b><br>
-      <b>XXOmegaRavenXX</b><br>
-      Основатели и главные администраторы города.</p>
+      <p>
+        <b>GienaSergo01</b><br>
+        <b>XXOmegaRavenXX</b><br>
+        Основатели и главные администраторы города.
+      </p>
     </article>
 
     <article class="glass">
       <h3>Инфраструктура 🏛️</h3>
-      <p>Жилые дома высотой 2–3 этажа, небольшой рынок, различные магазины, здание администрации и ресторан быстрого питания «Вкусно — и точка».</p>
+      <p>
+        Жилые дома высотой 2–3 этажа, небольшой рынок,
+        различные магазины, здание администрации
+        и ресторан быстрого питания «Вкусно — и точка».
+      </p>
     </article>
   </div>
 </section>
@@ -74,21 +85,27 @@
   <div class="newsCategory">
     <h3>Новости 📰</h3>
     <div class="cards" id="newsGeneral">
-      <article class="glass"><p>Загружаем новости...</p></article>
+      <article class="glass">
+        <p>Загружаем новости...</p>
+      </article>
     </div>
   </div>
 
   <div class="newsCategory">
     <h3>Инфраструктура 🏛️</h3>
     <div class="cards" id="newsInfrastructure">
-      <article class="glass"><p>Загружаем публикации...</p></article>
+      <article class="glass">
+        <p>Загружаем публикации...</p>
+      </article>
     </div>
   </div>
 
   <div class="newsCategory">
     <h3>Мини-игры 🎮</h3>
     <div class="cards" id="newsGames">
-      <article class="glass"><p>Загружаем публикации...</p></article>
+      <article class="glass">
+        <p>Загружаем публикации...</p>
+      </article>
     </div>
   </div>
 </section>
@@ -103,6 +120,7 @@
     <div class="mapIcon">⌖</div>
     <h3>Карта города LUX</h3>
     <p>Карта не точная!</p>
+
     <img
       id="luxCityMap"
       src="images/lux-map.png"
@@ -121,20 +139,22 @@
   </div>
 
   <div class="residentsFounders">
-    <h3>Основатели города 👑</h3>
+    <h3>Основатели и администрация 👑</h3>
 
     <div class="cards">
+
       <article class="glass residentCard">
         <div class="residentAvatar">G</div>
         <h3>GienaSergo01</h3>
-        <p>Основатель LUX</p>
+        <p>Мэр LUX</p>
       </article>
 
       <article class="glass residentCard">
         <div class="residentAvatar">X</div>
         <h3>XXOmegaRavenXX</h3>
-        <p>Основатель LUX</p>
+        <p>Зам. мэра LUX</p>
       </article>
+
     </div>
   </div>
 
@@ -143,20 +163,23 @@
     <p>Найди жителя и открой его цифровой паспорт.</p>
 
     <div class="lux-resident-controls">
+
       <input
         id="residentSearch"
         type="search"
         placeholder="Поиск по Minecraft-нику..."
         autocomplete="off"
       >
+
       <select id="residentRoleFilter">
         <option value="">Все должности</option>
-        <option value="Заместитель мэра">Заместитель мэра</option>
+        <option value="Зам. мэра">Зам. мэра</option>
         <option value="Архитектор">Архитектор</option>
         <option value="Полицейский">Полицейский</option>
         <option value="Продавец">Продавец</option>
         <option value="Житель">Житель</option>
       </select>
+
     </div>
 
     <div id="residentsCount" class="lux-residents-count"></div>
@@ -176,6 +199,7 @@
   </div>
 
   <form class="glass form" id="joinForm">
+
     <label>
       Minecraft-ник
       <input required maxlength="32" placeholder="Твой игровой ник">
@@ -192,8 +216,14 @@
     </label>
 
     <button class="silver">Подготовить заявку</button>
-    <p class="hint">Демонстрационная форма. Для отправки заявки свяжись с администрацией.</p>
+
+    <p class="hint">
+      Демонстрационная форма. Для отправки заявки
+      свяжись с администрацией.
+    </p>
+
     <p id="joinResult" class="result" aria-live="polite"></p>
+
   </form>
 </section>
 
@@ -206,10 +236,15 @@
 
   <div class="glass aiPanel">
     <div class="aiAvatar">✦</div>
+
     <div>
       <h3>Привет! Я LUX AI</h3>
-      <p>Могу рассказать о городе и помочь с базовыми вопросами Minecraft.</p>
+      <p>
+        Могу рассказать о городе и помочь
+        с базовыми вопросами Minecraft.
+      </p>
     </div>
+
     <button class="silver" id="openChat">Открыть LUX AI</button>
   </div>
 </section>
@@ -219,12 +254,18 @@
 <footer>
   <a class="logo" href="#home">LUX<span>✦</span></a>
   <p>Luminous Urban Xperience · Minecraft · AnMine PE</p>
-  <a href="https://t.me/SkyLUX110" target="_blank" rel="noopener">Telegram LUX ↗</a>
+  <a href="https://t.me/SkyLUX110" target="_blank" rel="noopener">
+    Telegram LUX ↗
+  </a>
 </footer>
 
+<!-- LUX AI -->
+
 <div class="chat" id="chat" aria-label="Чат LUX AI">
+
   <div class="chatTop">
     <b>✦ LUX AI <small>SMART MODE</small></b>
+
     <div>
       <button id="newChat" title="Новый чат">＋</button>
       <button id="closeChat" title="Закрыть">×</button>
@@ -240,16 +281,35 @@
   <div id="messages" class="messages" aria-live="polite"></div>
 
   <form id="chatForm" class="chatForm">
-    <input id="chatInput" maxlength="1000" placeholder="Напиши сообщение..." autocomplete="off" required>
+    <input
+      id="chatInput"
+      maxlength="1000"
+      placeholder="Напиши сообщение..."
+      autocomplete="off"
+      required
+    >
     <button aria-label="Отправить">➤</button>
   </form>
 
-  <div class="chatFoot">Локальная версия · встроенная база знаний</div>
+  <div class="chatFoot">
+    Локальная версия · встроенная база знаний
+  </div>
+
 </div>
 
 <button class="chatFab" id="chatFab">✦ LUX AI</button>
 
+<!-- Подключение Supabase -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Основной JavaScript -->
+
+<script src="app.js"></script>
+
+<!-- Новости LUX -->
+
+<script src="lux.news.js"></script>
 
 </body>
 </html>
