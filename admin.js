@@ -1,57 +1,74 @@
-
 (() => {
+  'use strict';
+
   const $ = id => document.getElementById(id);
-  const form = $("loginForm");
-  const status = $("status");
+
+  const form = $('loginForm');
+  const status = $('status');
 
   if (!form || !status) {
-    console.error("LUX: loginForm или status не найдены");
+    console.error('LUX: loginForm или status не найдены');
     return;
   }
 
-  const client = window.LUX_SUPABASE_URL &&
-    window.LUX_SUPABASE_ANON_KEY &&
-    window.supabase?.createClient
-      ? window.supabase.createClient(
-          window.LUX_SUPABASE_URL,
-          window.LUX_SUPABASE_ANON_KEY
-        )
-      : null;
+  const URL = window.LUX_SUPABASE_URL;
+  const KEY = window.LUX_SUPABASE_ANON_KEY;
+
+  const client = URL && KEY && window.supabase?.createClient
+    ? window.supabase.createClient(URL, KEY)
+    : null;
+
+  const CATEGORIES = [
+    'Новости',
+    'Инфраструктура',
+    'Мини-игры'
+  ];
 
   let admin = null;
   let editingId = null;
+  let newsCache = [];
 
-  const message = (text, error = false) => {
+  function message(text, error = false) {
     status.textContent = text;
-    status.style.color = error ? "#ff9aaa" : "#9bd0ff";
-  };
+    status.style.color = error ? '#ff9aaa' : '#9bd0ff';
+  }
 
-  const esc = value => String(value ?? "").replace(
-    /[&<>"']/g,
-    c => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[c]
-  );
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[char]);
+  }
+
+  function date(value) {
+    if (!value) return 'Дата не указана';
+
+    const result = new Date(value);
+
+    return Number.isNaN(result.getTime())
+      ? 'Дата не указана'
+      : result.toLocaleString('ru-RU');
+  }
 
   function createPanel() {
-    if ($("luxDashboard")) return;
+    if ($('luxDashboard')) return;
 
-    const panel = document.createElement("section");
-    panel.id = "luxDashboard";
+    const panel = document.createElement('section');
+    panel.id = 'luxDashboard';
 
     panel.innerHTML = `
       <style>
         #luxDashboard {
-          max-width: 850px;
+          max-width: 900px;
           margin: 30px auto;
           padding: 18px;
           color: #eef4ff;
           font-family: system-ui,sans-serif;
         }
+
         #luxDashboard .card {
           background: #101b30;
           border: 1px solid #b9d5ff35;
@@ -59,18 +76,25 @@
           padding: 20px;
           margin-bottom: 18px;
         }
-        #luxDashboard input,
-        #luxDashboard textarea {
+
+        #luxDashboard input:not([type=checkbox]),
+        #luxDashboard textarea,
+        #luxDashboard select {
           box-sizing: border-box;
           width: 100%;
           padding: 12px;
-          margin: 7px 0;
+          margin: 7px 0 15px;
           border-radius: 10px;
           border: 1px solid #526b91;
           background: #080f1e;
           color: white;
           font: inherit;
         }
+
+        #luxDashboard select option {
+          background: #101b30;
+        }
+
         #luxDashboard button {
           padding: 11px 15px;
           margin: 5px;
@@ -79,31 +103,64 @@
           font-weight: bold;
           cursor: pointer;
         }
+
+        #luxDashboard button:disabled {
+          opacity: .5;
+          cursor: wait;
+        }
+
         #luxDashboard .primary {
           background: linear-gradient(130deg,#f4f7fc,#a9b8ce);
           color: #101827;
         }
+
         #luxDashboard .secondary {
           background: #203653;
           color: white;
         }
+
         #luxDashboard .danger {
           background: #542c3a;
           color: white;
         }
+
         #luxDashboard .news {
-          padding: 15px;
+          padding: 17px;
           margin: 12px 0;
           border: 1px solid #b9d5ff35;
           border-radius: 14px;
           background: #0b1528;
         }
+
         #luxDashboard .muted {
           color: #a9b8d0;
           font-size: 13px;
         }
+
+        #luxDashboard .badge {
+          display: inline-block;
+          padding: 5px 10px;
+          border-radius: 20px;
+          background: #8bc5ff20;
+          color: #b9d9ff;
+          font-size: 12px;
+        }
+
+        #luxDashboard .toolbar {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          align-items: center;
+        }
+
         #luxDashboard [hidden] {
           display: none !important;
+        }
+
+        @media(max-width:600px) {
+          #luxDashboard {
+            padding: 10px;
+          }
         }
       </style>
 
@@ -114,253 +171,396 @@
       </div>
 
       <div class="card">
-        <h2 id="formTitle">Создать новость</h2>
+        <h2 id="formTitle">Создать новость 📰</h2>
 
         <form id="newsForm">
           <label>Заголовок</label>
           <input id="newsTitle" maxlength="160" required>
 
           <label>Категория</label>
-          <input id="newsCategory" value="Новости" maxlength="60">
+          <select id="newsCategory" required>
+            <option value="Новости">📰 Новости</option>
+            <option value="Инфраструктура">🏛️ Инфраструктура</option>
+            <option value="Мини-игры">🎮 Мини-игры</option>
+          </select>
 
-          <label>Текст новости</label>
-          <textarea id="newsContent" rows="6" required></textarea>
+          <label>Текст публикации</label>
+          <textarea
+            id="newsContent"
+            rows="7"
+            maxlength="10000"
+            required
+          ></textarea>
 
           <label>
-            <input id="newsPublished" type="checkbox" style="width:auto">
+            <input
+              id="newsPublished"
+              type="checkbox"
+              style="width:auto"
+            >
             Опубликовать сразу
           </label>
 
-          <button class="primary" id="saveNews">
-            Сохранить новость
-          </button>
+          <div class="toolbar">
+            <button class="primary" id="saveNews">
+              Сохранить публикацию
+            </button>
 
-          <button type="button" class="secondary"
-            id="cancelEdit" hidden>
-            Отмена
-          </button>
+            <button
+              type="button"
+              class="secondary"
+              id="cancelEdit"
+              hidden
+            >
+              Отмена
+            </button>
+          </div>
         </form>
       </div>
 
       <div class="card">
-        <h2>📰 Новости города</h2>
+        <h2>📰 Управление публикациями</h2>
+
+        <div class="toolbar">
+          <button class="secondary" data-filter="all">
+            Все
+          </button>
+          <button class="secondary" data-filter="Новости">
+            📰 Новости
+          </button>
+          <button class="secondary" data-filter="Инфраструктура">
+            🏛️ Инфраструктура
+          </button>
+          <button class="secondary" data-filter="Мини-игры">
+            🎮 Мини-игры
+          </button>
+          <button class="secondary" data-filter="draft">
+            Черновики
+          </button>
+        </div>
+
         <div id="newsList">Загрузка...</div>
       </div>
     `;
 
-    document.querySelector("main")?.append(panel);
+    document.querySelector('main')?.append(panel);
 
-    $("luxAdminName").textContent =
-      admin.username + " (" + admin.role + ")";
+    $('luxAdminName').textContent =
+      admin.username + ' · ' + admin.role;
+
+    let activeFilter = 'all';
 
     async function loadNews() {
-      const list = $("newsList");
-      list.textContent = "Загружаем новости...";
+      const list = $('newsList');
+      list.textContent = 'Загружаем публикации...';
 
       const { data, error } = await client
-        .from("lux_news")
-        .select("id,title,content,category,published,created_at")
-        .order("created_at", { ascending: false });
+        .from('lux_news')
+        .select('id,title,content,category,published,created_at')
+        .order('created_at', { ascending: false });
 
       if (error) {
-        list.textContent = "Ошибка: " + error.message;
+        list.textContent = 'Ошибка: ' + error.message;
         return;
       }
 
-      if (!data.length) {
-        list.textContent = "Новостей пока нет.";
+      newsCache = data || [];
+      renderNews();
+    }
+
+    function renderNews() {
+      const list = $('newsList');
+
+      let items = newsCache;
+
+      if (activeFilter === 'draft') {
+        items = items.filter(item => !item.published);
+      } else if (activeFilter !== 'all') {
+        items = items.filter(
+          item => item.category === activeFilter
+        );
+      }
+
+      if (!items.length) {
+        list.textContent = 'В этой категории пока нет публикаций.';
         return;
       }
 
-      list.innerHTML = data.map(n => `
+      list.innerHTML = items.map(item => `
         <article class="news">
-          <div class="muted">
-            ${esc(n.category || "Новости")} ·
-            ${n.published ? "Опубликована" : "Черновик"}
+
+          <div class="toolbar">
+            <span class="badge">
+              ${esc(item.category || 'Новости')}
+            </span>
+
+            <span class="muted">
+              ${item.published ? 'Опубликована' : 'Черновик'}
+            </span>
           </div>
-          <h3>${esc(n.title)}</h3>
-          <p style="white-space:pre-wrap">${esc(n.content)}</p>
 
-          <button class="secondary"
-            data-edit="${esc(n.id)}">Изменить</button>
+          <h3>${esc(item.title)}</h3>
 
-          <button class="secondary"
-            data-publish="${esc(n.id)}"
-            data-state="${n.published}">
-            ${n.published ? "Снять с публикации" : "Опубликовать"}
-          </button>
+          <p style="white-space:pre-wrap">
+            ${esc(item.content)}
+          </p>
 
-          ${admin.role === "owner" ? `
-            <button class="danger"
-              data-delete="${esc(n.id)}">Удалить</button>
-          ` : ""}
+          <small class="muted">
+            ${esc(date(item.created_at))}
+          </small>
+
+          <div class="toolbar">
+            <button class="secondary"
+              data-edit="${esc(item.id)}">
+              ✏️ Изменить
+            </button>
+
+            <button class="secondary"
+              data-publish="${esc(item.id)}">
+              ${item.published
+                ? 'Снять с публикации'
+                : 'Опубликовать'}
+            </button>
+
+            ${admin.role === 'owner' ? `
+              <button class="danger"
+                data-delete="${esc(item.id)}">
+                🗑️ Удалить
+              </button>
+            ` : ''}
+          </div>
+
         </article>
-      `).join("");
+      `).join('');
     }
 
     function resetForm() {
       editingId = null;
-      $("newsForm").reset();
-      $("newsCategory").value = "Новости";
-      $("formTitle").textContent = "Создать новость";
-      $("saveNews").textContent = "Сохранить новость";
-      $("cancelEdit").hidden = true;
+      $('newsForm').reset();
+
+      $('newsCategory').value = 'Новости';
+      $('formTitle').textContent = 'Создать новость 📰';
+      $('saveNews').textContent = 'Сохранить публикацию';
+      $('cancelEdit').hidden = true;
     }
 
-    $("newsForm").addEventListener("submit", async e => {
-      e.preventDefault();
+    $('newsForm').addEventListener('submit', async event => {
+      event.preventDefault();
 
-      const button = $("saveNews");
+      const button = $('saveNews');
       button.disabled = true;
 
       try {
         const payload = {
-          title: $("newsTitle").value.trim(),
-          category: $("newsCategory").value.trim() || "Новости",
-          content: $("newsContent").value.trim(),
-          published: $("newsPublished").checked
+          title: $('newsTitle').value.trim(),
+          category: $('newsCategory').value,
+          content: $('newsContent').value.trim(),
+          published: $('newsPublished').checked
         };
 
         if (!payload.title || !payload.content) {
-          throw new Error("Заполни все обязательные поля.");
+          throw new Error('Заполни заголовок и текст.');
+        }
+
+        if (!CATEGORIES.includes(payload.category)) {
+          throw new Error('Неизвестная категория.');
         }
 
         const result = editingId
-          ? await client.from("lux_news")
-              .update(payload).eq("id", editingId)
-          : await client.from("lux_news").insert(payload);
+          ? await client
+              .from('lux_news')
+              .update(payload)
+              .eq('id', editingId)
+          : await client
+              .from('lux_news')
+              .insert(payload);
 
         if (result.error) throw result.error;
 
         resetForm();
         await loadNews();
-        message("Новость успешно сохранена!");
+
+        message('Публикация успешно сохранена! ✦');
+
       } catch (error) {
-        message("Ошибка: " + error.message, true);
+        message('Ошибка: ' + error.message, true);
       } finally {
         button.disabled = false;
       }
     });
 
-    $("cancelEdit").onclick = resetForm;
+    $('cancelEdit').addEventListener('click', resetForm);
 
-    $("newsList").addEventListener("click", async e => {
-      const edit = e.target.closest("[data-edit]");
-      const publish = e.target.closest("[data-publish]");
-      const remove = e.target.closest("[data-delete]");
+    panel.querySelectorAll('[data-filter]').forEach(button => {
+      button.addEventListener('click', () => {
+        activeFilter = button.dataset.filter;
+        renderNews();
+      });
+    });
+
+    $('newsList').addEventListener('click', async event => {
+      const edit = event.target.closest('[data-edit]');
+      const publish = event.target.closest('[data-publish]');
+      const remove = event.target.closest('[data-delete]');
 
       try {
         if (edit) {
-          const { data, error } = await client
-            .from("lux_news")
-            .select("*")
-            .eq("id", edit.dataset.edit)
-            .single();
+          const item = newsCache.find(
+            news => String(news.id) === edit.dataset.edit
+          );
 
-          if (error) throw error;
+          if (!item) throw new Error('Публикация не найдена.');
 
-          editingId = data.id;
-          $("newsTitle").value = data.title;
-          $("newsCategory").value = data.category || "Новости";
-          $("newsContent").value = data.content;
-          $("newsPublished").checked = data.published;
+          editingId = item.id;
 
-          $("formTitle").textContent = "Редактировать новость";
-          $("saveNews").textContent = "Сохранить изменения";
-          $("cancelEdit").hidden = false;
+          $('newsTitle').value = item.title;
+          $('newsCategory').value = item.category || 'Новости';
+          $('newsContent').value = item.content;
+          $('newsPublished').checked = item.published;
 
-          panel.scrollIntoView({ behavior: "smooth" });
+          $('formTitle').textContent = 'Редактирование публикации';
+          $('saveNews').textContent = 'Сохранить изменения';
+          $('cancelEdit').hidden = false;
+
+          panel.scrollIntoView({ behavior: 'smooth' });
         }
 
         if (publish) {
+          const item = newsCache.find(
+            news => String(news.id) === publish.dataset.publish
+          );
+
+          if (!item) throw new Error('Публикация не найдена.');
+
           const { error } = await client
-            .from("lux_news")
-            .update({
-              published: publish.dataset.state !== "true"
-            })
-            .eq("id", publish.dataset.publish);
+            .from('lux_news')
+            .update({ published: !item.published })
+            .eq('id', item.id);
 
           if (error) throw error;
 
           await loadNews();
-          message("Статус публикации изменён.");
+          message('Статус публикации изменён.');
         }
 
         if (remove) {
-          if (admin.role !== "owner") {
-            throw new Error("Недостаточно прав.");
+          if (admin.role !== 'owner') {
+            throw new Error('Недостаточно прав.');
           }
 
-          if (!confirm("Удалить эту новость?")) return;
+          if (!confirm('Удалить публикацию без возможности восстановления?')) {
+            return;
+          }
 
           const { error } = await client
-            .from("lux_news")
+            .from('lux_news')
             .delete()
-            .eq("id", remove.dataset.delete);
+            .eq('id', remove.dataset.delete);
 
           if (error) throw error;
 
           await loadNews();
-          message("Новость удалена.");
+          message('Публикация удалена.');
         }
+
       } catch (error) {
-        message("Ошибка: " + error.message, true);
+        message('Ошибка: ' + error.message, true);
       }
     });
 
-    $("luxLogout").onclick = async () => {
+    $('luxLogout').addEventListener('click', async () => {
       await client.auth.signOut();
       panel.remove();
-      form.closest("section")?.scrollIntoView();
-      message("Вы вышли из системы.");
-    };
+      admin = null;
+      message('Вы вышли из системы.');
+    });
 
     loadNews();
   }
 
-  form.addEventListener("submit", async e => {
-    e.preventDefault();
+  async function authorize(user) {
+    if (!user) {
+      admin = null;
+      return;
+    }
+
+    const { data, error } = await client
+      .from('lux_admins')
+      .select('username,role')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data || !['owner', 'editor'].includes(data.role)) {
+      await client.auth.signOut();
+      throw new Error('Нет доступа к панели LUX ADMIN.');
+    }
+
+    admin = data;
+    createPanel();
+  }
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
 
     if (!client) {
-      message("Проверь настройки Supabase.", true);
+      message('Проверь настройки Supabase.', true);
       return;
     }
 
     const button = form.querySelector('button[type="submit"]');
+
     if (button) button.disabled = true;
 
-    message("Выполняется вход...");
+    message('Выполняется вход...');
 
     try {
       const { data, error } = await client.auth.signInWithPassword({
-        email: $("email").value.trim(),
-        password: $("password").value
+        email: $('email').value.trim(),
+        password: $('password').value
       });
 
       if (error) throw error;
 
-      const { data: record, error: adminError } = await client
-        .from("lux_admins")
-        .select("username,role")
-        .eq("user_id", data.user.id)
-        .maybeSingle();
+      await authorize(data.user);
 
-      if (adminError) throw adminError;
-
-      if (!record || !["owner", "editor"].includes(record.role)) {
-        await client.auth.signOut();
-        throw new Error("UID не найден в lux_admins.");
-      }
-
-      admin = record;
-      message("Авторизация успешна!");
-
-      createPanel();
+      message('Добро пожаловать в LUX ADMIN! ✦');
 
     } catch (error) {
-      message("Ошибка: " + error.message, true);
+      message('Ошибка: ' + error.message, true);
     } finally {
       if (button) button.disabled = false;
     }
   });
+
+  async function initialize() {
+    if (!client) {
+      message('Supabase не настроен.', true);
+      return;
+    }
+
+    try {
+      const { data, error } = await client.auth.getSession();
+
+      if (error) throw error;
+
+      if (data.session?.user) {
+        await authorize(data.session.user);
+        message('Сессия восстановлена.');
+      }
+
+      client.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT') {
+          admin = null;
+          $('luxDashboard')?.remove();
+        }
+      });
+
+    } catch (error) {
+      message('Ошибка восстановления сессии: ' + error.message, true);
+    }
+  }
+
+  initialize();
 })();
