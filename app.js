@@ -2,7 +2,6 @@
    LUX — MAIN APP.JS
    Luminous Urban Xperience
 ========================================== */
-
 (() => {
   'use strict';
 
@@ -25,7 +24,6 @@
   ========================================== */
 
   const STORE = 'lux_ai_chats_v2';
-
   let chats = [];
 
   try {
@@ -80,7 +78,6 @@
 
     chat.messages.forEach(message => {
       const element = document.createElement('div');
-
       element.className =
         'msg ' + (message.role === 'user' ? 'user' : '');
 
@@ -243,6 +240,21 @@
 
   let residents = [];
   let filteredResidents = [];
+
+  /*
+    Приводим старые варианты должности к одному названию.
+    В Supabase ничего менять не требуется.
+  */
+
+  function normalizeResidentRole(role) {
+    const value = String(role || 'Житель').trim();
+
+    if (/^(заместитель мэра|зам\.\s*мэра)$/i.test(value)) {
+      return 'Зам.мэра';
+    }
+
+    return value || 'Житель';
+  }
 
   function residentsStyles() {
     if ($('luxResidentsStyles')) return;
@@ -537,7 +549,9 @@
 
     const value = new Date(date);
 
-    if (Number.isNaN(value.getTime())) return 'Не указана';
+    if (Number.isNaN(value.getTime())) {
+      return 'Не указана';
+    }
 
     return value.toLocaleDateString('ru-RU');
   }
@@ -588,7 +602,7 @@
 
     const fields = [
       ['Игровой ник', resident.minecraft_nick],
-      ['Должность', resident.role || 'Житель'],
+      ['Должность', normalizeResidentRole(resident.role)],
       ['Дата вступления', safeDate(resident.joined_at)],
       ['Статус', resident.is_active ? 'Активный житель' : 'Неактивный житель'],
       ['Telegram', resident.telegram || 'Не указан'],
@@ -654,7 +668,7 @@
 
     const role = document.createElement('div');
     role.className = 'lux-resident-role';
-    role.textContent = resident.role || 'Житель';
+    role.textContent = normalizeResidentRole(resident.role);
 
     const button = document.createElement('button');
     button.className = 'lux-passport-button';
@@ -680,7 +694,7 @@
 
     filteredResidents = residents.filter(resident => {
       const nick = String(resident.minecraft_nick || '').toLowerCase();
-      const role = resident.role || 'Житель';
+      const role = normalizeResidentRole(resident.role);
 
       return nick.includes(search) &&
         (!selectedRole || role === selectedRole);
@@ -748,6 +762,7 @@
           Проверь, что библиотека Supabase подключена перед app.js.
         </div>
       `;
+
       return;
     }
 
@@ -767,7 +782,7 @@
 
       residents = (data || []).filter(resident => {
         return !founders.includes(
-          String(resident.minecraft_nick || '').toLowerCase()
+          String(resident.minecraft_nick || '').trim().toLowerCase()
         );
       });
 
@@ -817,7 +832,6 @@
 
   $('clearChat')?.addEventListener('click', () => {
     const chat = current();
-
     if (!chat) return;
 
     if (confirm('Удалить сообщения текущего чата?')) {
@@ -865,6 +879,7 @@
     nav.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         nav.classList.remove('show');
+
         menuBtn.setAttribute('aria-expanded', 'false');
         menuBtn.setAttribute('aria-label', 'Открыть меню');
         menuBtn.textContent = '☰';
