@@ -1,4 +1,4 @@
-~~~html
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -143,7 +143,6 @@
     <h3>Основатели и администрация 👑</h3>
 
     <div class="cards">
-
       <article class="glass residentCard">
         <div class="residentAvatar">G</div>
         <h3>GienaSergo01</h3>
@@ -155,7 +154,6 @@
         <h3>XXOmegaRavenXX</h3>
         <p>Зам.мэра LUX</p>
       </article>
-
     </div>
   </div>
 
@@ -164,7 +162,6 @@
     <p>Найди жителя и открой его цифровой паспорт.</p>
 
     <div class="lux-resident-controls">
-
       <input
         id="residentSearch"
         type="search"
@@ -180,7 +177,6 @@
         <option value="Продавец">Продавец</option>
         <option value="Житель">Житель</option>
       </select>
-
     </div>
 
     <div id="residentsCount" class="lux-residents-count"></div>
@@ -200,7 +196,6 @@
   </div>
 
   <form class="glass form" id="joinForm">
-
     <label>
       Minecraft-ник
       <input required maxlength="32" placeholder="Твой игровой ник">
@@ -224,7 +219,6 @@
     </p>
 
     <p id="joinResult" class="result" aria-live="polite"></p>
-
   </form>
 </section>
 
@@ -263,7 +257,6 @@
 <!-- LUX AI -->
 
 <div class="chat" id="chat" aria-label="Чат LUX AI">
-
   <div class="chatTop">
     <b>✦ LUX AI <small>SMART MODE</small></b>
 
@@ -295,7 +288,6 @@
   <div class="chatFoot">
     Локальная версия · встроенная база знаний
   </div>
-
 </div>
 
 <button class="chatFab" id="chatFab">✦ LUX AI</button>
@@ -303,12 +295,14 @@
 <!-- Подключение Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- Конфигурация Supabase -->
+<script src="supabase-config.js"></script>
+
 <!-- Основной JavaScript -->
 <script src="app.js"></script>
 
 <!-- Новости LUX -->
-<script src="lux.news.js"></script>
+<script src="lux-news.js"></script>
 
 </body>
 </html>
-~~~
