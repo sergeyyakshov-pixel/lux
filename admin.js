@@ -1,3 +1,4 @@
+
 (() => {
   'use strict';
 
@@ -25,8 +26,10 @@
   ];
 
   let admin = null;
+  let adminUserId = null;
   let editingId = null;
   let newsCache = [];
+  let vacancyCache = [];
 
   function message(text, error = false) {
     status.textContent = text;
@@ -119,12 +122,18 @@
           color: white;
         }
 
+        #luxDashboard .success {
+          background: #24543f;
+          color: white;
+        }
+
         #luxDashboard .danger {
           background: #542c3a;
           color: white;
         }
 
-        #luxDashboard .news {
+        #luxDashboard .news,
+        #luxDashboard .application {
           padding: 17px;
           margin: 12px 0;
           border: 1px solid #b9d5ff35;
@@ -151,6 +160,11 @@
           flex-wrap: wrap;
           gap: 8px;
           align-items: center;
+        }
+
+        #luxDashboard .application p {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
         }
 
         #luxDashboard [hidden] {
@@ -222,33 +236,50 @@
         <h2>📰 Управление публикациями</h2>
 
         <div class="toolbar">
-          <button class="secondary" data-filter="all">
-            Все
-          </button>
-          <button class="secondary" data-filter="Новости">
-            📰 Новости
-          </button>
-          <button class="secondary" data-filter="Инфраструктура">
-            🏛️ Инфраструктура
-          </button>
-          <button class="secondary" data-filter="Мини-игры">
-            🎮 Мини-игры
-          </button>
-          <button class="secondary" data-filter="draft">
-            Черновики
-          </button>
+          <button class="secondary" data-filter="all">Все</button>
+          <button class="secondary" data-filter="Новости">📰 Новости</button>
+          <button class="secondary" data-filter="Инфраструктура">🏛️ Инфраструктура</button>
+          <button class="secondary" data-filter="Мини-игры">🎮 Мини-игры</button>
+          <button class="secondary" data-filter="draft">Черновики</button>
         </div>
 
         <div id="newsList">Загрузка...</div>
       </div>
+
+      <div class="card">
+        <h2>📋 Заявки на вакансии</h2>
+        <p class="muted">
+          Здесь отображаются только заявки на должности,
+          ожидающие решения администрации.
+        </p>
+
+        <div class="toolbar">
+          <button class="secondary" id="refreshVacancies">
+            🔄 Обновить заявки
+          </button>
+        </div>
+
+        <div id="vacancyList">Загрузка заявок...</div>
+      </div>
     `;
 
-    document.querySelector('main')?.append(panel);
+    const main = document.querySelector('main');
+
+    if (!main) {
+      message('На странице не найден элемент main.', true);
+      return;
+    }
+
+    main.append(panel);
 
     $('luxAdminName').textContent =
       admin.username + ' · ' + admin.role;
 
     let activeFilter = 'all';
+
+    // -------------------------
+    // НОВОСТИ
+    // -------------------------
 
     async function loadNews() {
       const list = $('newsList');
@@ -288,7 +319,6 @@
 
       list.innerHTML = items.map(item => `
         <article class="news">
-
           <div class="toolbar">
             <span class="badge">
               ${esc(item.category || 'Новости')}
@@ -301,35 +331,29 @@
 
           <h3>${esc(item.title)}</h3>
 
-          <p style="white-space:pre-wrap">
-            ${esc(item.content)}
-          </p>
+          <p style="white-space:pre-wrap">${esc(item.content)}</p>
 
           <small class="muted">
             ${esc(date(item.created_at))}
           </small>
 
           <div class="toolbar">
-            <button class="secondary"
-              data-edit="${esc(item.id)}">
+            <button class="secondary" data-edit="${esc(item.id)}">
               ✏️ Изменить
             </button>
 
-            <button class="secondary"
-              data-publish="${esc(item.id)}">
+            <button class="secondary" data-publish="${esc(item.id)}">
               ${item.published
                 ? 'Снять с публикации'
                 : 'Опубликовать'}
             </button>
 
             ${admin.role === 'owner' ? `
-              <button class="danger"
-                data-delete="${esc(item.id)}">
+              <button class="danger" data-delete="${esc(item.id)}">
                 🗑️ Удалить
               </button>
             ` : ''}
           </div>
-
         </article>
       `).join('');
     }
@@ -399,9 +423,13 @@
     });
 
     $('newsList').addEventListener('click', async event => {
-      const edit = event.target.closest('[data-edit]');
-      const publish = event.target.closest('[data-publish]');
-      const remove = event.target.closest('[data-delete]');
+      const target = event.target;
+
+      if (!(target instanceof Element)) return;
+
+      const edit = target.closest('[data-edit]');
+      const publish = target.closest('[data-publish]');
+      const remove = target.closest('[data-delete]');
 
       try {
         if (edit) {
@@ -468,19 +496,222 @@
       }
     });
 
+    // -------------------------
+    // ЗАЯВКИ НА ВАКАНСИИ
+    // -------------------------
+
+    async function loadVacancies() {
+      const list = $('vacancyList');
+      list.textContent = 'Загружаем заявки...';
+
+      const { data, error } = await client
+        .from('lux_applications')
+        .select(`
+          id,
+          minecraft_nickname,
+          telegram,
+          message,
+          status,
+          created_at,
+          application_type,
+          position,
+          admin_comment
+        `)
+        .eq('application_type', 'vacancy')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        list.textContent = 'Ошибка загрузки: ' + error.message;
+        return;
+      }
+
+      vacancyCache = data || [];
+      renderVacancies();
+    }
+
+    function renderVacancies() {
+      const list = $('vacancyList');
+
+      if (!vacancyCache.length) {
+        list.textContent = 'Новых заявок на вакансии пока нет.';
+        return;
+      }
+
+      list.innerHTML = vacancyCache.map(item => `
+        <article class="application">
+          <div class="toolbar">
+            <span class="badge">Ожидает решения</span>
+            <span class="muted">${esc(date(item.created_at))}</span>
+          </div>
+
+          <h3>${esc(item.minecraft_nickname)}</h3>
+
+          <p>
+            <strong>Должность:</strong>
+            ${esc(item.position || 'Не указана')}
+          </p>
+
+          <p>
+            <strong>Telegram:</strong>
+            ${esc(item.telegram || 'Не указан')}
+          </p>
+
+          <p>
+            <strong>Сообщение:</strong><br>
+            ${esc(item.message || 'Без сообщения')}
+          </p>
+
+          <div class="toolbar">
+            <button
+              class="success"
+              data-approve="${esc(item.id)}"
+            >
+              ✓ Принять
+            </button>
+
+            <button
+              class="danger"
+              data-reject="${esc(item.id)}"
+            >
+              ✕ Отклонить
+            </button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    async function reviewVacancy(id, newStatus) {
+      const application = vacancyCache.find(
+        item => String(item.id) === String(id)
+      );
+
+      if (!application) {
+        throw new Error('Заявка не найдена или уже обработана.');
+      }
+
+      let comment = '';
+
+      if (newStatus === 'rejected') {
+        comment = prompt(
+          'Укажи причину отклонения заявки:'
+        );
+
+        if (comment === null) return;
+
+        comment = comment.trim();
+
+        if (!comment) {
+          throw new Error('Для отклонения укажи причину.');
+        }
+      } else {
+        comment = prompt(
+          'Комментарий администрации (необязательно):'
+        );
+
+        if (comment === null) return;
+
+        comment = comment.trim();
+      }
+
+      const buttons = $('vacancyList').querySelectorAll('button');
+      buttons.forEach(button => {
+        button.disabled = true;
+      });
+
+      try {
+        const { data, error } = await client
+          .from('lux_applications')
+          .update({
+            status: newStatus,
+            reviewed_by: adminUserId,
+            reviewed_at: new Date().toISOString(),
+            admin_comment: comment || null
+          })
+          .eq('id', id)
+          .eq('application_type', 'vacancy')
+          .eq('status', 'pending')
+          .select('id');
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          throw new Error(
+            'Заявка не обновлена. Возможно, её уже обработали или нет прав.'
+          );
+        }
+
+        await loadVacancies();
+
+        message(
+          newStatus === 'approved'
+            ? 'Заявка принята! ✓'
+            : 'Заявка отклонена.'
+        );
+
+      } finally {
+        buttons.forEach(button => {
+          button.disabled = false;
+        });
+      }
+    }
+
+    $('vacancyList').addEventListener('click', async event => {
+      const target = event.target;
+
+      if (!(target instanceof Element)) return;
+
+      const approve = target.closest('[data-approve]');
+      const reject = target.closest('[data-reject]');
+
+      try {
+        if (approve) {
+          await reviewVacancy(approve.dataset.approve, 'approved');
+        }
+
+        if (reject) {
+          await reviewVacancy(reject.dataset.reject, 'rejected');
+        }
+      } catch (error) {
+        message('Ошибка модерации: ' + error.message, true);
+      }
+    });
+
+    $('refreshVacancies').addEventListener('click', async () => {
+      await loadVacancies();
+      message('Список заявок обновлён.');
+    });
+
+    // -------------------------
+    // ВЫХОД
+    // -------------------------
+
     $('luxLogout').addEventListener('click', async () => {
-      await client.auth.signOut();
+      const { error } = await client.auth.signOut();
+
+      if (error) {
+        message('Ошибка выхода: ' + error.message, true);
+        return;
+      }
+
       panel.remove();
       admin = null;
+      adminUserId = null;
       message('Вы вышли из системы.');
     });
 
     loadNews();
+    loadVacancies();
   }
+
+  // -------------------------
+  // ПРОВЕРКА АДМИНИСТРАТОРА
+  // -------------------------
 
   async function authorize(user) {
     if (!user) {
       admin = null;
+      adminUserId = null;
       return;
     }
 
@@ -498,8 +729,14 @@
     }
 
     admin = data;
+    adminUserId = user.id;
+
     createPanel();
   }
+
+  // -------------------------
+  // ВХОД
+  // -------------------------
 
   form.addEventListener('submit', async event => {
     event.preventDefault();
@@ -534,6 +771,10 @@
     }
   });
 
+  // -------------------------
+  // ВОССТАНОВЛЕНИЕ СЕССИИ
+  // -------------------------
+
   async function initialize() {
     if (!client) {
       message('Supabase не настроен.', true);
@@ -550,15 +791,19 @@
         message('Сессия восстановлена.');
       }
 
-      client.auth.onAuthStateChange((event, session) => {
+      client.auth.onAuthStateChange((event) => {
         if (event === 'SIGNED_OUT') {
           admin = null;
+          adminUserId = null;
           $('luxDashboard')?.remove();
         }
       });
 
     } catch (error) {
-      message('Ошибка восстановления сессии: ' + error.message, true);
+      message(
+        'Ошибка восстановления сессии: ' + error.message,
+        true
+      );
     }
   }
 
