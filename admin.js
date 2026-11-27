@@ -500,6 +500,15 @@
     // ЗАЯВКИ НА ВАКАНСИИ
     // -------------------------
 
+    let vacancyFilter = 'all';
+    let vacancyBusy = false;
+
+    const VACANCY_STATUSES = {
+      pending: 'Ожидает рассмотрения',
+      approved: 'Одобрена',
+      rejected: 'Отклонена'
+    };
+
     async function loadVacancies() {
       const list = $('vacancyList');
       list.textContent = 'Загружаем заявки...';
@@ -515,14 +524,15 @@
           created_at,
           application_type,
           position,
-          admin_comment
+          admin_comment,
+          reviewed_by,
+          reviewed_at
         `)
         .eq('application_type', 'vacancy')
-        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) {
-        list.textContent = 'Ошибка загрузки: ' + error.message;
+        list.textContent = 'Ошибка: ' + error.message;
         return;
       }
 
@@ -532,77 +542,129 @@
 
     function renderVacancies() {
       const list = $('vacancyList');
+      const count = $('vacancyCount');
 
-      if (!vacancyCache.length) {
-        list.textContent = 'Новых заявок на вакансии пока нет.';
+      let items = vacancyCache;
+
+      if (vacancyFilter !== 'all') {
+        items = items.filter(
+          item => item.status === vacancyFilter
+        );
+      }
+
+      if (count) {
+        count.textContent =
+          `Всего заявок: ${vacancyCache.length} · Показано: ${items.length}`;
+      }
+
+      if (!items.length) {
+        list.textContent = 'В этой категории заявок пока нет.';
         return;
       }
 
-      list.innerHTML = vacancyCache.map(item => `
-        <article class="application">
-          <div class="toolbar">
-            <span class="badge">Ожидает решения</span>
-            <span class="muted">${esc(date(item.created_at))}</span>
-          </div>
+      list.innerHTML = items.map(item => {
+        const pending = item.status === 'pending';
 
-          <h3>${esc(item.minecraft_nickname)}</h3>
+        const statusText =
+          VACANCY_STATUSES[item.status] || item.status;
 
-          <p>
-            <strong>Должность:</strong>
-            ${esc(item.position || 'Не указана')}
-          </p>
+        return `
+          <article class="application">
 
-          <p>
-            <strong>Telegram:</strong>
-            ${esc(item.telegram || 'Не указан')}
-          </p>
+            <div class="toolbar">
+              <span class="badge">
+                ${esc(statusText)}
+              </span>
 
-          <p>
-            <strong>Сообщение:</strong><br>
-            ${esc(item.message || 'Без сообщения')}
-          </p>
+              <span class="muted">
+                ${esc(date(item.created_at))}
+              </span>
+            </div>
 
-          <div class="toolbar">
-            <button
-              class="success"
-              data-approve="${esc(item.id)}"
-            >
-              ✓ Принять
-            </button>
+            <h3>👤 ${esc(item.minecraft_nickname)}</h3>
 
-            <button
-              class="danger"
-              data-reject="${esc(item.id)}"
-            >
-              ✕ Отклонить
-            </button>
-          </div>
-        </article>
-      `).join('');
+            <p>
+              <strong>Должность:</strong>
+              ${esc(item.position || 'Не указана')}
+            </p>
+
+            <p>
+              <strong>Telegram:</strong>
+              ${esc(item.telegram || 'Не указан')}
+            </p>
+
+            <p>
+              <strong>Сообщение:</strong><br>
+              ${esc(item.message || 'Без сообщения')}
+            </p>
+
+            ${!pending ? `
+              <div class="muted">
+                <p>
+                  <strong>Дата рассмотрения:</strong>
+                  ${esc(date(item.reviewed_at))}
+                </p>
+
+                <p>
+                  <strong>Комментарий администрации:</strong><br>
+                  ${esc(item.admin_comment || 'Не указан')}
+                </p>
+              </div>
+            ` : ''}
+
+            ${pending ? `
+              <div class="toolbar">
+
+                <button
+                  class="success"
+                  data-approve="${esc(item.id)}"
+                  ${vacancyBusy ? 'disabled' : ''}
+                >
+                  ✓ Одобрить
+                </button>
+
+                <button
+                  class="danger"
+                  data-reject="${esc(item.id)}"
+                  ${vacancyBusy ? 'disabled' : ''}
+                >
+                  ✕ Отклонить
+                </button>
+
+              </div>
+            ` : ''}
+
+          </article>
+        `;
+      }).join('');
     }
 
     async function reviewVacancy(id, newStatus) {
+      if (vacancyBusy) return;
+
+      if (!['approved', 'rejected'].includes(newStatus)) {
+        throw new Error('Неизвестный статус заявки.');
+      }
+
       const application = vacancyCache.find(
         item => String(item.id) === String(id)
       );
 
-      if (!application) {
-        throw new Error('Заявка не найдена или уже обработана.');
+      if (!application || application.status !== 'pending') {
+        throw new Error('Заявка уже обработана или не найдена.');
       }
 
       let comment = '';
 
       if (newStatus === 'rejected') {
-        comment = prompt(
-          'Укажи причину отклонения заявки:'
-        );
+        comment = prompt('Укажи причину отклонения:');
 
         if (comment === null) return;
 
         comment = comment.trim();
 
         if (!comment) {
-          throw new Error('Для отклонения укажи причину.');
+          throw new Error('Причина отклонения обязательна.');
         }
       } else {
         comment = prompt(
@@ -614,10 +676,8 @@
         comment = comment.trim();
       }
 
-      const buttons = $('vacancyList').querySelectorAll('button');
-      buttons.forEach(button => {
-        button.disabled = true;
-      });
+      vacancyBusy = true;
+      renderVacancies();
 
       try {
         const { data, error } = await client
@@ -637,22 +697,21 @@
 
         if (!data || data.length === 0) {
           throw new Error(
-            'Заявка не обновлена. Возможно, её уже обработали или нет прав.'
+            'Заявка не обновлена. Проверь права Supabase.'
           );
         }
 
-        await loadVacancies();
-
         message(
           newStatus === 'approved'
-            ? 'Заявка принята! ✓'
-            : 'Заявка отклонена.'
+            ? 'Заявка одобрена! ✓'
+            : 'Заявка отклонена. ✕'
         );
 
+        await loadVacancies();
+
       } finally {
-        buttons.forEach(button => {
-          button.disabled = false;
-        });
+        vacancyBusy = false;
+        renderVacancies();
       }
     }
 
@@ -666,20 +725,44 @@
 
       try {
         if (approve) {
-          await reviewVacancy(approve.dataset.approve, 'approved');
+          await reviewVacancy(
+            approve.dataset.approve,
+            'approved'
+          );
         }
 
         if (reject) {
-          await reviewVacancy(reject.dataset.reject, 'rejected');
+          await reviewVacancy(
+            reject.dataset.reject,
+            'rejected'
+          );
         }
+
       } catch (error) {
         message('Ошибка модерации: ' + error.message, true);
       }
     });
 
+    $('vacancyFilters').addEventListener('click', event => {
+      const button = event.target.closest('[data-vacancy-filter]');
+
+      if (!button) return;
+
+      vacancyFilter = button.dataset.vacancyFilter;
+
+      $('vacancyFilters')
+        .querySelectorAll('button')
+        .forEach(item => {
+          item.className =
+            item === button ? 'primary' : 'secondary';
+        });
+
+      renderVacancies();
+    });
+
     $('refreshVacancies').addEventListener('click', async () => {
       await loadVacancies();
-      message('Список заявок обновлён.');
+      message('Заявки обновлены.');
     });
 
     // -------------------------
